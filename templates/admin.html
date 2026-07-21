@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Talent Pools - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="font-title fw-bold m-0">Candidate Management</h2>
+      <p class="text-muted mb-0">Search talent database, verify credentials, and schedule interview stages</p>
+    </div>
+  </div>
+
+  <!-- Advanced Search & Filter Drawer -->
+  <div class="card glass-card p-4 mb-4 shadow-sm border-0">
+    <h6 class="font-title fw-bold text-muted mb-3" style="font-size: 0.8rem; letter-spacing: 0.5px;">DATABASE SEARCH AND FILTERING</h6>
+    <div class="row g-3">
+      
+      <!-- Global Search -->
+      <div class="col-md-3">
+        <label for="globalSearch" class="form-label font-title fw-semibold text-muted mb-1" style="font-size: 0.78rem;">SEARCH</label>
+        <div class="input-group">
+          <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" class="form-control form-control-custom border-start-0" id="globalSearch" placeholder="Name, email, keywords...">
+        </div>
+      </div>
+      
+      <!-- Job Role -->
+      <div class="col-md-2">
+        <label for="roleFilter" class="form-label font-title fw-semibold text-muted mb-1" style="font-size: 0.78rem;">JOB ROLE</label>
+        <select class="form-select form-control-custom" id="roleFilter">
+          <option value="">All Job Roles</option>
+          {% for title in job_titles %}
+          <option value="{{ title }}">{{ title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- ATS Score -->
+      <div class="col-md-2">
+        <label for="scoreFilter" class="form-label font-title fw-semibold text-muted mb-1" style="font-size: 0.78rem;">ATS MATCH</label>
+        <select class="form-select form-control-custom" id="scoreFilter">
+          <option value="">All Scores</option>
+          <option value="85-100">Gold Tier (85%+)</option>
+          <option value="70-84">Silver Tier (70%-84%)</option>
+          <option value="55-69">Bronze Tier (55%-69%)</option>
+          <option value="0-54">Needs Review (<55%)</option>
+        </select>
+      </div>
+
+      <!-- Experience Years -->
+      <div class="col-md-2">
+        <label for="experienceFilter" class="form-label font-title fw-semibold text-muted mb-1" style="font-size: 0.78rem;">EXPERIENCE</label>
+        <select class="form-select form-control-custom" id="experienceFilter">
+          <option value="">All Experience</option>
+          <option value="0-2">Junior (0-2 Yrs)</option>
+          <option value="3-5">Mid-Level (3-5 Yrs)</option>
+          <option value="6-9">Senior (6-9 Yrs)</option>
+          <option value="10-30">Lead / Director (10+ Yrs)</option>
+        </select>
+      </div>
+
+      <!-- Status -->
+      <div class="col-md-2">
+        <label for="statusFilter" class="form-label font-title fw-semibold text-muted mb-1" style="font-size: 0.78rem;">HIRING STATUS</label>
+        <select class="form-select form-control-custom" id="statusFilter">
+          <option value="">All Statuses</option>
+          <option value="Applied">Applied</option>
+          <option value="Screening">Screening</option>
+          <option value="Shortlisted">Shortlisted</option>
+          <option value="Interview Scheduled">Interview Scheduled</option>
+          <option value="Technical Round">Technical Round</option>
+          <option value="HR Round">HR Round</option>
+          <option value="Selected">Selected</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      
+      <!-- Clear filters -->
+      <div class="col-md-1 d-flex align-items-end">
+        <button type="button" class="btn btn-light border w-100 py-2 font-title fw-semibold text-muted" onclick="window.location.reload();">
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Candidates Table -->
+  <div class="card glass-card shadow-sm border-0">
+    <div class="table-responsive p-3">
+      <table class="table align-middle custom-table">
+        <thead>
+          <tr class="text-muted">
+            <th>Candidate Profile</th>
+            <th>Target Position</th>
+            <th>ATS Score</th>
+            <th>Ranking Tier</th>
+            <th>Hiring Stage</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if applications %}
+            {% for app in applications %}
+              {% set score_item = app.resume.scores|selectattr("job_id", "equalto", app.job_id)|first %}
+              {% set ranking_item = app.candidate.rankings|selectattr("job_id", "equalto", app.job_id)|first %}
+              {% set cand_exp = ((score_item.experience_score / 10.0)|int) if score_item else 0 %}
+              <tr class="candidate-row" 
+                  data-name="{{ app.candidate.full_name }}" 
+                  data-email="{{ app.candidate.email }}" 
+                  data-role="{{ app.job.title }}" 
+                  data-score="{{ score_item.overall_intelligence_score if score_item else 0 }}"
+                  data-status="{{ app.status }}"
+                  data-experience="{{ cand_exp }}">
+                
+                <!-- Profile details -->
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle fw-bold me-3 font-title" style="width: 44px; height: 44px; font-size: 0.95rem;">
+                      {{ app.candidate.full_name[:2].upper() }}
+                    </div>
+                    <div>
+                      <div class="fw-bold m-0" style="font-size: 0.95rem; color: var(--text-color);">{{ app.candidate.full_name }}</div>
+                      <div class="text-muted" style="font-size: 0.8rem;">{{ app.candidate.email }} &bull; {{ cand_exp }} Yrs Exp</div>
+                    </div>
+                  </div>
+                </td>
+                
+                <!-- Position -->
+                <td>
+                  <div class="fw-semibold">{{ app.job.title }}</div>
+                  <div class="text-muted" style="font-size: 0.8rem;">{{ app.job.department }}</div>
+                </td>
+                
+                <!-- Score -->
+                <td>
+                  <span class="fw-bold fs-5" style="color: var(--primary-color);">{{ score_item.overall_intelligence_score if score_item else 'N/A' }}%</span>
+                </td>
+                
+                <!-- Ranking Medals -->
+                <td>
+                  {% if ranking_item and ranking_item.tier != 'None' %}
+                    <span class="medal-badge medal-{{ ranking_item.tier }}">
+                      <i class="fa-solid fa-medal"></i>{{ ranking_item.tier }}
+                    </span>
+                  {% else %}
+                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;">Needs Review</span>
+                  {% endif %}
+                </td>
+                
+                <!-- Hiring Stage Badge -->
+                <td>
+                  <span class="badge-status badge-{{ app.status.split()[0] }}">
+                    {{ app.status }}
+                  </span>
+                </td>
+                
+                <!-- Actions Dropdown -->
+                <td class="text-end">
+                  <div class="dropdown">
+                    <button class="btn btn-light btn-sm rounded-circle p-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fa-solid fa-ellipsis-vertical text-muted"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 glass-card p-1">
+                      {% if score_item %}
+                      <li>
+                        <a class="dropdown-item py-2" href="{{ url_for('preview_candidate', app_id=app.id) }}">
+                          <i class="fa-regular fa-eye me-2 text-primary"></i>View Profile Analysis
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item py-2" href="{{ url_for('download_report_pdf', score_id=score_item.id) }}">
+                          <i class="fa-regular fa-file-pdf me-2 text-danger"></i>Download PDF Report
+                        </a>
+                      </li>
+                      {% endif %}
+                      <li>
+                        <a class="dropdown-item py-2" href="{{ url_for('download_resume', resume_id=app.resume_id) }}">
+                          <i class="fa-solid fa-download me-2 text-success"></i>Download Resume
+                        </a>
+                      </li>
+                      <li>
+                        <button class="dropdown-item py-2" data-bs-toggle="modal" data-bs-target="#statusModal{{ app.id }}">
+                          <i class="fa-solid fa-tags me-2 text-warning"></i>Update Hiring Stage
+                        </button>
+                      </li>
+                      <li class="border-top my-1 opacity-25"></li>
+                      <li>
+                        <a class="dropdown-item py-2 text-danger" href="{{ url_for('delete_application', app_id=app.id) }}" onclick="return confirm('Are you sure you want to delete this candidate application?');">
+                          <i class="fa-regular fa-trash-can me-2"></i>Delete Applicant
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- Status Modal -->
+                  <div class="modal fade" id="statusModal{{ app.id }}" tabindex="-1" aria-hidden="true" style="text-align: left;">
+                    <div class="modal-dialog modal-dialog-centered">
+                      <div class="modal-content glass-card border p-3">
+                        <div class="modal-header border-0 pb-0">
+                          <h5 class="modal-title font-title fw-bold">Update Stage: {{ app.candidate.full_name }}</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{{ url_for('update_candidate_status', app_id=app.id) }}" method="POST">
+                          <div class="modal-body py-3">
+                            <label class="form-label font-title fw-semibold text-muted">Hiring Funnel Stage</label>
+                            <select class="form-select form-control-custom" name="status">
+                              <option value="Applied" {% if app.status == 'Applied' %}selected{% endif %}>Applied</option>
+                              <option value="Screening" {% if app.status == 'Screening' %}selected{% endif %}>Screening</option>
+                              <option value="Shortlisted" {% if app.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                              <option value="Interview Scheduled" {% if app.status == 'Interview Scheduled' %}selected{% endif %}>Interview Scheduled</option>
+                              <option value="Technical Round" {% if app.status == 'Technical Round' %}selected{% endif %}>Technical Round</option>
+                              <option value="HR Round" {% if app.status == 'HR Round' %}selected{% endif %}>HR Round</option>
+                              <option value="Selected" {% if app.status == 'Selected' %}selected{% endif %}>Selected</option>
+                              <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                            </select>
+                          </div>
+                          <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light border px-4 font-title fw-bold text-muted" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-custom px-4">Update Stage</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center py-5 text-muted">
+                <i class="fa-regular fa-folder-open fs-2 d-block mb-2 opacity-50"></i>
+                No candidate applications found in the database.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

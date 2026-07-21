@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: calc(85vh - 120px); margin-top: 10px; margin-bottom: 20px;">
+  <div class="col-md-8 col-lg-5">
+    
+    <div class="card glass-card p-4 shadow animate-fade-in">
+      <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 60px; height: 60px;">
+          <i class="fa-solid fa-user-plus fs-3"></i>
+        </div>
+        <h3 class="font-title fw-bold">Create Account</h3>
+        <p class="text-muted" style="font-size: 0.9rem;">Join the AI recruitment platform today</p>
+      </div>
+
+      <form action="{{ url_for('auth.register') }}" method="POST">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="full_name" class="form-label font-title fw-semibold">Full Name</label>
+            <input type="text" class="form-control form-control-custom" id="full_name" name="full_name" required placeholder="John Doe">
+          </div>
+          <div class="col-md-6">
+            <label for="username" class="form-label font-title fw-semibold">Username</label>
+            <input type="text" class="form-control form-control-custom" id="username" name="username" required placeholder="johndoe">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label font-title fw-semibold">Email Address</label>
+          <input type="email" class="form-control form-control-custom" id="email" name="email" required placeholder="john@company.com">
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="password" class="form-label font-title fw-semibold">Password</label>
+            <input type="password" class="form-control form-control-custom" id="password" name="password" required placeholder="Password">
+          </div>
+          <div class="col-md-6">
+            <label for="confirm_password" class="form-label font-title fw-semibold">Confirm Password</label>
+            <input type="password" class="form-control form-control-custom" id="confirm_password" name="confirm_password" required placeholder="Confirm Password">
+          </div>
+        </div>
+
+        <!-- Password requirements card -->
+        <div class="card bg-light border-0 p-3 mb-3" style="font-size: 0.8rem;">
+          <h6 class="font-title fw-bold text-dark mb-2">Password Requirements:</h6>
+          <ul class="list-unstyled mb-0 text-muted">
+            <li><i class="fa-solid fa-circle-check text-muted me-1"></i> At least 8 characters long</li>
+            <li><i class="fa-solid fa-circle-check text-muted me-1"></i> At least one uppercase letter (A-Z)</li>
+            <li><i class="fa-solid fa-circle-check text-muted me-1"></i> At least one number (0-9)</li>
+            <li><i class="fa-solid fa-circle-check text-muted me-1"></i> At least one special symbol (!@#$%^&*)</li>
+          </ul>
+        </div>
+
+        <div class="mb-4">
+          <label for="role" class="form-label font-title fw-semibold">Register As</label>
+          <select class="form-select form-control-custom" id="role" name="role">
+            <option value="candidate" selected>Candidate (Looking for Jobs)</option>
+            <option value="admin">Recruiter / HR Admin (Managing Candidates)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-custom w-100 py-2">
+          Create Account
+        </button>
+      </form>
+
+      <div class="text-center mt-4">
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-primary fw-semibold text-decoration-none">Sign In here</a></p>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

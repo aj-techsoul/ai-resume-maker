@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Help & Support - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Help & Support Center</h2>
+    <p class="text-muted mb-0">Find answers, search knowledge base guides, or contact technical support.</p>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="glass-card p-4 text-center h-100">
+      <div class="kpi-icon mx-auto mb-3">
+        <i class="fa-solid fa-book-open"></i>
+      </div>
+      <h5 class="fw-bold">User Documentation</h5>
+      <p class="text-muted small">Comprehensive guides for resume parsing, TF-IDF scoring, and ATS configuration.</p>
+      <a href="#" class="btn btn-sm btn-outline-primary rounded-pill mt-2">Browse Guides</a>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="glass-card p-4 text-center h-100">
+      <div class="kpi-icon mx-auto mb-3 bg-success bg-opacity-10 text-success">
+        <i class="fa-solid fa-headset"></i>
+      </div>
+      <h5 class="fw-bold">24/7 Priority Support</h5>
+      <p class="text-muted small">Need urgent help with candidate reports or database backup? Open a support ticket.</p>
+      <button class="btn btn-sm btn-outline-success rounded-pill mt-2" onclick="document.getElementById('ticketForm').scrollIntoView({behavior: 'smooth'})">Open Ticket</button>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="glass-card p-4 text-center h-100">
+      <div class="kpi-icon mx-auto mb-3 bg-warning bg-opacity-10 text-warning">
+        <i class="fa-solid fa-circle-play"></i>
+      </div>
+      <h5 class="fw-bold">Video Tutorials</h5>
+      <p class="text-muted small">Watch 2-minute walkthroughs covering candidate rankings and custom PDF exports.</p>
+      <a href="#" class="btn btn-sm btn-outline-warning rounded-pill mt-2">Watch Videos</a>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="glass-card p-4 mb-4">
+      <h5 class="fw-bold mb-3"><i class="fa-solid fa-circle-question text-primary me-2"></i>Frequently Asked Questions</h5>
+      <div class="accordion accordion-flush" id="faqAccordion">
+        <div class="accordion-item bg-transparent">
+          <h2 class="accordion-header" id="faqOne">
+            <button class="accordion-button collapsed bg-transparent fw-semibold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+              How does the RoBERTa & TF-IDF AI match scoring work?
+            </button>
+          </h2>
+          <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted small">
+              Our dual-engine AI cleans resume text (lemmatization & stopword removal), computes TF-IDF similarity vectors against the Job Description requirements, and evaluates 12 critical sub-scores (grammar, readability, tech skills, soft skills).
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item bg-transparent">
+          <h2 class="accordion-header" id="faqTwo">
+            <button class="accordion-button collapsed bg-transparent fw-semibold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+              What file formats are supported for resume uploading?
+            </button>
+          </h2>
+          <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted small">
+              ScreenAI supports PDF (.pdf) and Microsoft Word (.docx) files up to 5MB in size. Text is automatically parsed using pdfplumber and python-docx.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item bg-transparent">
+          <h2 class="accordion-header" id="faqThree">
+            <button class="accordion-button collapsed bg-transparent fw-semibold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+              How do I switch dashboard themes?
+            </button>
+          </h2>
+          <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted small">
+              Click any of the theme dots in the top navigation header bar to switch instantly between Executive Blue (Cat Theme), Emerald Professional (Dog Theme), Royal Indigo (Pink Theme), Slate Executive (Blue Theme), or Graphite Premium (Dark Theme).
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5" id="ticketForm">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-3"><i class="fa-solid fa-paper-plane text-success me-2"></i>Submit Support Ticket</h5>
+      <form onsubmit="event.preventDefault(); showToast('success', 'Support ticket submitted! Ticket #TK-9081 created.'); this.reset();">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Subject</label>
+          <input type="text" class="form-control form-control-custom" placeholder="e.g. Issue downloading PDF report" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Priority Level</label>
+          <select class="form-select form-control-custom">
+            <option>Normal</option>
+            <option>High</option>
+            <option>Urgent</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Description</label>
+          <textarea class="form-control form-control-custom" rows="4" placeholder="Describe your issue or question in detail..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-custom w-100">Submit Ticket</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

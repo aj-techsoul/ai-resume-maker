@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Packages - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="text-center max-w-75 mx-auto mb-5">
+  <h2 class="fw-bold mb-2">Enterprise Plan Comparison</h2>
+  <p class="text-muted fs-5">Transparent pricing and AI screening capabilities designed to scale from startups to Fortune 500 recruiting teams.</p>
+</div>
+
+<div class="row g-4 align-items-stretch mb-5">
+  <!-- Starter Tier -->
+  <div class="col-lg-4">
+    <div class="glass-card p-4 h-100 d-flex flex-column border-top border-4 border-secondary">
+      <div class="mb-3">
+        <span class="badge bg-secondary text-uppercase px-3 py-2 rounded-pill">Starter</span>
+      </div>
+      <h3 class="fw-bold">$49 <span class="fs-6 text-muted font-body fw-normal">/ mo</span></h3>
+      <p class="text-muted small">Ideal for small teams with under 5 active openings.</p>
+
+      <ul class="list-unstyled my-4 flex-grow-1 d-flex flex-column gap-3">
+        <li><i class="fa-solid fa-check text-success me-2"></i> Up to 5 Active Job Postings</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> 100 Resume Parse Credits / mo</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> Standard TF-IDF Matching</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> PDF & DOCX Parsing</li>
+        <li class="text-muted opacity-50"><i class="fa-solid fa-xmark text-danger me-2"></i> RoBERTa Neural AI Ranking</li>
+        <li class="text-muted opacity-50"><i class="fa-solid fa-xmark text-danger me-2"></i> PDF Candidate Screening Reports</li>
+        <li class="text-muted opacity-50"><i class="fa-solid fa-xmark text-danger me-2"></i> Custom Theme Palettes</li>
+      </ul>
+
+      <button class="btn btn-outline-primary w-100 rounded-3 py-2 fw-semibold">Current Plan</button>
+    </div>
+  </div>
+
+  <!-- Professional Tier (Featured) -->
+  <div class="col-lg-4">
+    <div class="glass-card p-4 h-100 d-flex flex-column border-top border-4 border-primary position-relative shadow-lg">
+      <span class="position-absolute top-0 end-0 bg-primary text-white text-uppercase font-title px-3 py-1 rounded-bl fw-bold" style="font-size: 0.72rem; border-bottom-left-radius: 12px;">Most Popular</span>
+      
+      <div class="mb-3">
+        <span class="badge bg-primary px-3 py-2 rounded-pill">Professional</span>
+      </div>
+      <h3 class="fw-bold text-primary">$199 <span class="fs-6 text-muted font-body fw-normal">/ mo</span></h3>
+      <p class="text-muted small">Designed for growing HR departments and active hiring cycles.</p>
+
+      <ul class="list-unstyled my-4 flex-grow-1 d-flex flex-column gap-3">
+        <li><i class="fa-solid fa-check text-success me-2"></i> Unlimited Active Job Postings</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> 2,500 Resume Parse Credits / mo</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> RoBERTa AI Match Scoring</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> Automated Candidate Ranking & Medals</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> ReportLab PDF Exporting</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> 5 Premium CSS Themes</li>
+        <li class="text-muted opacity-50"><i class="fa-solid fa-xmark text-danger me-2"></i> Custom Domain & API Access</li>
+      </ul>
+
+      <button class="btn btn-custom w-100 rounded-3 py-2 fw-semibold">Upgrade to Professional</button>
+    </div>
+  </div>
+
+  <!-- Enterprise Tier -->
+  <div class="col-lg-4">
+    <div class="glass-card p-4 h-100 d-flex flex-column border-top border-4 border-dark">
+      <div class="mb-3">
+        <span class="badge bg-dark text-white px-3 py-2 rounded-pill">Enterprise</span>
+      </div>
+      <h3 class="fw-bold">$499 <span class="fs-6 text-muted font-body fw-normal">/ mo</span></h3>
+      <p class="text-muted small">For enterprise organizations needing custom SLA & dedicated support.</p>
+
+      <ul class="list-unstyled my-4 flex-grow-1 d-flex flex-column gap-3">
+        <li><i class="fa-solid fa-check text-success me-2"></i> Unlimited Everything</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> Custom Fine-Tuned LLM Model</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> Dedicated Account Manager</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> SSO / SAML Authentication</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> Full REST API Access</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> 99.9% Uptime Guarantee SLA</li>
+        <li><i class="fa-solid fa-check text-success me-2"></i> White-label Custom Branding</li>
+      </ul>
+
+      <button class="btn btn-dark w-100 rounded-3 py-2 fw-semibold">Contact Sales</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

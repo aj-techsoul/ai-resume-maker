@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Profile - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Customer & Account Profile</h2>
+    <p class="text-muted mb-0">Manage your user information, company details, preferences, and security settings.</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="glass-card p-4 text-center">
+      <div class="avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 fw-bold fs-2" style="width: 80px; height: 80px;">
+        {{ current_user.full_name[0] if current_user.full_name else 'U' }}
+      </div>
+      <h4 class="fw-bold mb-1">{{ current_user.full_name or current_user.username }}</h4>
+      <p class="text-muted small mb-3">{{ current_user.email }}</p>
+      <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill text-capitalize fw-semibold mb-3">
+        <i class="fa-solid fa-user-shield me-1"></i> {{ current_user.role }} Account
+      </span>
+      <div class="border-top pt-3 text-start">
+        <div class="d-flex justify-content-between py-2 border-bottom">
+          <span class="text-muted">Username</span>
+          <span class="fw-semibold">{{ current_user.username }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-2 border-bottom">
+          <span class="text-muted">Theme Preference</span>
+          <span class="fw-semibold text-capitalize">{{ current_user.theme_preference|replace('-', ' ') }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-2">
+          <span class="text-muted">Status</span>
+          <span class="badge bg-success text-white">Active</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-4 border-bottom pb-2"><i class="fa-solid fa-user-pen text-primary me-2"></i>Edit Profile Details</h5>
+      
+      <form onsubmit="event.preventDefault(); showToast('success', 'Profile updated successfully.');">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Full Name</label>
+            <input type="text" class="form-control form-control-custom" value="{{ current_user.full_name or '' }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Email Address</label>
+            <input type="email" class="form-control form-control-custom" value="{{ current_user.email or '' }}" required>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Organization / Company</label>
+            <input type="text" class="form-control form-control-custom" value="Enterprise Recruiting Inc.">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Industry Sector</label>
+            <select class="form-select form-control-custom">
+              <option selected>Information Technology & Software</option>
+              <option>Finance & Banking</option>
+              <option>Healthcare & Biotech</option>
+              <option>E-Commerce & Retail</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="border-top pt-4 text-end">
+          <button type="submit" class="btn btn-custom px-4">
+            <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

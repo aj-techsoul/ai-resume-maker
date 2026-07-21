@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}System Settings - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="font-title fw-bold m-0">System Control</h2>
+      <p class="text-muted mb-0">Audit predictions, manage algorithm retraining, copy backups, and view logs</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('database_backup_simulation') }}" class="btn btn-light border font-title fw-bold text-muted">
+        <i class="fa-solid fa-database me-2 text-warning"></i>Backup Database
+      </a>
+      <form action="{{ url_for('simulate_model_retraining') }}" method="POST">
+        <button type="submit" class="btn btn-custom">
+          <i class="fa-solid fa-arrows-spin me-2"></i>Retrain AI Model
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings Tabs -->
+  <div class="card glass-card p-4 shadow-sm border-0">
+    
+    <ul class="nav nav-tabs nav-tabs-custom mb-3" id="settingsTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="models-tab" data-bs-toggle="tab" data-bs-target="#models" type="button" role="tab">AI Model Registry</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="predictions-tab" data-bs-toggle="tab" data-bs-target="#predictions" type="button" role="tab">Prediction Logs</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="activities-tab" data-bs-toggle="tab" data-bs-target="#activities" type="button" role="tab">Audit Trails</button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="settingsTabContent">
+      
+      <!-- Tab 1: AI Model Registry -->
+      <div class="tab-pane fade show active" id="models" role="tabpanel">
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr class="text-muted" style="font-size: 0.85rem;">
+                <th>Model Version</th>
+                <th>Validation Accuracy</th>
+                <th>Training Timestamp</th>
+                <th>Deployment Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if models %}
+                {% for model in models %}
+                <tr>
+                  <td class="fw-bold">{{ model.version }}</td>
+                  <td>{{ model.accuracy }}%</td>
+                  <td class="text-muted">{{ model.trained_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                  <td>
+                    {% if model.active %}
+                    <span class="badge bg-success rounded-pill px-3 py-1.5" style="font-size: 0.75rem;">Active & In-Use</span>
+                    {% else %}
+                    <span class="badge bg-light text-dark border rounded-pill px-3 py-1.5" style="font-size: 0.75rem;">Deactivated</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted">No models in registry.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 2: Prediction Logs (Audit trail) -->
+      <div class="tab-pane fade" id="predictions" role="tabpanel">
+        <div class="table-responsive">
+          <table class="table align-middle" style="font-size: 0.85rem;">
+            <thead>
+              <tr class="text-muted">
+                <th>Log ID</th>
+                <th>Job Posting</th>
+                <th>Feature Inputs</th>
+                <th>AI Classification Output</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if predictions %}
+                {% for log in predictions %}
+                <tr>
+                  <td><code>#PR-{{ log.id }}</code></td>
+                  <td>Job #{{ log.job_id }}</td>
+                  <td><code style="word-break: break-all;">{{ log.input_features }}</code></td>
+                  <td><code style="word-break: break-all;" class="text-primary">{{ log.output_scores }}</code></td>
+                  <td class="text-muted">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center py-4 text-muted">No screening predictions logged yet.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 3: System Activity Logs -->
+      <div class="tab-pane fade" id="activities" role="tabpanel">
+        <div class="table-responsive">
+          <table class="table align-middle" style="font-size: 0.85rem;">
+            <thead>
+              <tr class="text-muted">
+                <th>IP Address</th>
+                <th>Action Description</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if activities %}
+                {% for log in activities %}
+                <tr>
+                  <td><code>{{ log.ip_address or '127.0.0.1' }}</code></td>
+                  <td>{{ log.action }}</td>
+                  <td class="text-muted">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="3" class="text-center py-4 text-muted">No activities recorded.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

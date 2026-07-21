@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Budget Simulator - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Recruitment Budget Simulator</h2>
+    <p class="text-muted mb-0">Project recruitment costs, agency fees, tool subscriptions, and candidate salary ranges.</p>
+  </div>
+  <button class="btn btn-custom" onclick="window.print()">
+    <i class="fa-solid fa-file-export me-1"></i> Export Projection
+  </button>
+</div>
+
+<div class="row g-4">
+  <!-- Controls Column -->
+  <div class="col-lg-5">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-sliders text-primary me-2"></i>Simulation Variables</h5>
+      
+      <div class="mb-4">
+        <label class="form-label fw-semibold d-flex justify-content-between">
+          <span>Target New Hires</span>
+          <span class="text-primary fw-bold" id="hiresVal">10</span>
+        </label>
+        <input type="range" class="form-range" id="hiresRange" min="1" max="50" value="10" oninput="updateSimulation()">
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold d-flex justify-content-between">
+          <span>Average Annual Salary ($)</span>
+          <span class="text-primary fw-bold" id="salaryVal">$95,000</span>
+        </label>
+        <input type="range" class="form-range" id="salaryRange" min="40000" max="250000" step="5000" value="95000" oninput="updateSimulation()">
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold d-flex justify-content-between">
+          <span>Sourcing Channel</span>
+          <span class="badge bg-secondary" id="channelBadge">In-House ATS</span>
+        </label>
+        <select class="form-select form-control-custom" id="channelSelect" onchange="updateSimulation()">
+          <option value="0.05">In-House ATS (5% Overhead)</option>
+          <option value="0.12">Hybrid Sourcing (12% Overhead)</option>
+          <option value="0.20">External Agency (20% Fee)</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold d-flex justify-content-between">
+          <span>Estimated Onboarding Time (Weeks)</span>
+          <span class="text-primary fw-bold" id="weeksVal">3 Weeks</span>
+        </label>
+        <input type="range" class="form-range" id="weeksRange" min="1" max="12" value="3" oninput="updateSimulation()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Column -->
+  <div class="col-lg-7">
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <div class="glass-card p-4 text-center">
+          <small class="text-muted text-uppercase fw-semibold">Total Projected Investment</small>
+          <h2 class="fw-bold text-primary mt-2 mb-0" id="totalInvestment">$1,017,500</h2>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="glass-card p-4 text-center">
+          <small class="text-muted text-uppercase fw-semibold">Recruitment Cost Per Hire</small>
+          <h2 class="fw-bold text-success mt-2 mb-0" id="costPerHire">$6,750</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-3"><i class="fa-solid fa-chart-pie text-info me-2"></i>Cost Distribution Breakdown</h5>
+      <div class="table-responsive">
+        <table class="table custom-table">
+          <thead>
+            <tr>
+              <th>Expense Category</th>
+              <th>Calculation Basis</th>
+              <th class="text-end">Projected Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="fw-semibold">Base Payroll (Year 1)</td>
+              <td class="text-muted">Salary x Hires</td>
+              <td class="text-end fw-bold text-dark" id="payrollAmount">$950,000</td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">Recruitment & Sourcing Overhead</td>
+              <td class="text-muted">Channel Sourcing Ratio</td>
+              <td class="text-end fw-bold text-primary" id="sourcingAmount">$47,500</td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">ATS Platform & Screening Infrastructure</td>
+              <td class="text-muted">Enterprise Tier</td>
+              <td class="text-end fw-bold text-info" id="atsAmount">$12,000</td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">Onboarding & Equipment Setup</td>
+              <td class="text-muted">$800/Hire + Ramp-up</td>
+              <td class="text-end fw-bold text-warning" id="onboardingAmount">$8,000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateSimulation() {
+  const hires = parseInt(document.getElementById('hiresRange').value);
+  const salary = parseInt(document.getElementById('salaryRange').value);
+  const sourcingRatio = parseFloat(document.getElementById('channelSelect').value);
+  const weeks = parseInt(document.getElementById('weeksRange').value);
+
+  document.getElementById('hiresVal').textContent = hires;
+  document.getElementById('salaryVal').textContent = '$' + salary.toLocaleString();
+  document.getElementById('weeksVal').textContent = weeks + ' Weeks';
+
+  const payroll = hires * salary;
+  const sourcing = Math.round(payroll * sourcingRatio);
+  const ats = 12000;
+  const onboarding = hires * 800;
+  const total = payroll + sourcing + ats + onboarding;
+  const perHire = Math.round((sourcing + ats + onboarding) / hires);
+
+  document.getElementById('totalInvestment').textContent = '$' + total.toLocaleString();
+  document.getElementById('costPerHire').textContent = '$' + perHire.toLocaleString();
+  document.getElementById('payrollAmount').textContent = '$' + payroll.toLocaleString();
+  document.getElementById('sourcingAmount').textContent = '$' + sourcing.toLocaleString();
+  document.getElementById('atsAmount').textContent = '$' + ats.toLocaleString();
+  document.getElementById('onboardingAmount').textContent = '$' + onboarding.toLocaleString();
+}
+</script>
+{% endblock %}

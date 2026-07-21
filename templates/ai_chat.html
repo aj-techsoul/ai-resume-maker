@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}AI Chat Assistant - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">AI Copilot & Candidate Chat</h2>
+    <p class="text-muted mb-0">Ask questions, analyze resumes, or simulate candidate interview questions in real-time.</p>
+  </div>
+  <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-semibold">
+    <i class="fa-solid fa-sparkles me-1"></i> Powered by RoBERTa ATS Core
+  </span>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="glass-card d-flex flex-column" style="height: 600px;">
+      <!-- Chat Header -->
+      <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-light bg-opacity-25">
+        <div class="d-flex align-items-center gap-3">
+          <div class="avatar-md bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 42px; height: 42px;">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div>
+            <div class="fw-bold text-dark mb-0">ScreenAI Talent Copilot</div>
+            <small class="text-success"><i class="fa-solid fa-circle me-1" style="font-size: 0.6rem;"></i> Active & Ready</small>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="clearChatLog()">
+          <i class="fa-solid fa-rotate-right me-1"></i> Clear Session
+        </button>
+      </div>
+
+      <!-- Chat Stream Window -->
+      <div class="p-4 flex-grow-1 overflow-auto d-flex flex-column gap-3" id="chatStream">
+        <div class="d-flex gap-3 max-w-75">
+          <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; min-width: 32px;">
+            <i class="fa-solid fa-robot fs-6"></i>
+          </div>
+          <div class="p-3 rounded-4 bg-light text-dark shadow-sm border" style="max-width: 80%;">
+            Hello {{ current_user.full_name or 'there' }}! I am your AI Talent Assistant. I can help analyze candidate resumes, rank applicants, generate screening questions, or project hiring metrics. How can I help you today?
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="p-3 border-top bg-white">
+        <form id="aiChatForm" class="d-flex gap-2">
+          <input type="text" id="aiQueryInput" class="form-control form-control-custom" placeholder="Type a message or question about candidates, jobs, or ATS benchmarks..." required>
+          <button type="submit" class="btn btn-custom px-4">
+            <i class="fa-solid fa-paper-plane me-1"></i> Send
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="glass-card p-4 mb-4">
+      <h5 class="fw-bold mb-3"><i class="fa-solid fa-lightbulb text-warning me-2"></i>Quick Prompts</h5>
+      <div class="d-flex flex-column gap-2">
+        <button class="btn btn-light text-start p-3 rounded-3 border prompt-btn" onclick="sendPrompt('Rank my top 3 candidates for Senior Developer position')">
+          <i class="fa-solid fa-trophy text-primary me-2"></i> Rank top 3 candidates for Senior Dev
+        </button>
+        <button class="btn btn-light text-start p-3 rounded-3 border prompt-btn" onclick="sendPrompt('Generate 5 technical interview questions for Python ATS project')">
+          <i class="fa-solid fa-code text-success me-2"></i> Generate 5 Python technical questions
+        </button>
+        <button class="btn btn-light text-start p-3 rounded-3 border prompt-btn" onclick="sendPrompt('What skills are missing from recent backend applicants?')">
+          <i class="fa-solid fa-chart-pie text-info me-2"></i> Identify missing candidate skills
+        </button>
+        <button class="btn btn-light text-start p-3 rounded-3 border prompt-btn" onclick="sendPrompt('Calculate average time to hire across departments')">
+          <i class="fa-solid fa-stopwatch text-danger me-2"></i> Calculate average hiring time
+        </button>
+      </div>
+    </div>
+
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-2">Model Status</h5>
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-muted">Active Model</span>
+        <span class="fw-semibold">RoBERTa-v1.0</span>
+      </div>
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-muted">Accuracy Rating</span>
+        <span class="fw-semibold text-success">89.4%</span>
+      </div>
+      <div class="d-flex justify-content-between py-2">
+        <span class="text-muted">Response Speed</span>
+        <span class="fw-semibold">~1.2s</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function sendPrompt(text) {
+  document.getElementById('aiQueryInput').value = text;
+  document.getElementById('aiChatForm').dispatchEvent(new Event('submit'));
+}
+
+function clearChatLog() {
+  const stream = document.getElementById('chatStream');
+  stream.innerHTML = `
+    <div class="d-flex gap-3">
+      <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; min-width: 32px;">
+        <i class="fa-solid fa-robot fs-6"></i>
+      </div>
+      <div class="p-3 rounded-4 bg-light text-dark shadow-sm border" style="max-width: 80%;">
+        Chat session reset. What would you like to explore next?
+      </div>
+    </div>
+  `;
+}
+
+document.getElementById('aiChatForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const input = document.getElementById('aiQueryInput');
+  const query = input.value.trim();
+  if (!query) return;
+
+  const stream = document.getElementById('chatStream');
+
+  // Append User message
+  const userMsg = document.createElement('div');
+  userMsg.className = 'd-flex gap-3 justify-content-end';
+  userMsg.innerHTML = `
+    <div class="p-3 rounded-4 bg-primary text-white shadow-sm" style="max-width: 80%;">
+      ${query}
+    </div>
+  `;
+  stream.appendChild(userMsg);
+  input.value = '';
+  stream.scrollTop = stream.scrollHeight;
+
+  // Append AI loading state
+  const aiMsg = document.createElement('div');
+  aiMsg.className = 'd-flex gap-3';
+  aiMsg.innerHTML = `
+    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; min-width: 32px;">
+      <i class="fa-solid fa-robot fs-6"></i>
+    </div>
+    <div class="p-3 rounded-4 bg-light text-dark shadow-sm border" style="max-width: 80%;">
+      <i class="fa-solid fa-circle-notch fa-spin me-2 text-primary"></i> Analyzing candidate data & computing response...
+    </div>
+  `;
+  stream.appendChild(aiMsg);
+  stream.scrollTop = stream.scrollHeight;
+
+  // Simulate AI Response after 1s
+  setTimeout(() => {
+    let reply = "Based on our candidate database, candidates matching your criteria have an average match score of 88%. Key strengths include Python, Flask API design, and SQL optimization.";
+    if (query.toLowerCase().includes('rank')) {
+      reply = "Top Candidate Rankings:\n1. Alex Mercer (Score: 94% - Gold Tier)\n2. Sarah Jenkins (Score: 88% - Silver Tier)\n3. David Chen (Score: 82% - Bronze Tier)";
+    } else if (query.toLowerCase().includes('question') || query.toLowerCase().includes('interview')) {
+      reply = "Recommended Technical Questions:\n1. How do you optimize TF-IDF vectorizers for large document datasets?\n2. Explain multi-threading vs async I/O in Python APIs.\n3. How do you handle schema migrations with SQLAlchemy?";
+    }
+    aiMsg.querySelector('.p-3').innerHTML = reply.replace(/\n/g, '<br>');
+    stream.scrollTop = stream.scrollHeight;
+  }, 1000);
+});
+</script>
+{% endblock %}

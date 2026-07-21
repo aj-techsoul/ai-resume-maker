@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: calc(80vh - 120px);">
+  <div class="col-md-6 col-lg-4">
+    
+    <!-- Login Form Card -->
+    {% if not forgot %}
+    <div class="card glass-card p-4 shadow animate-fade-in">
+      <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 60px; height: 60px;">
+          <i class="fa-solid fa-lock fs-3"></i>
+        </div>
+        <h3 class="font-title fw-bold">Welcome Back</h3>
+        <p class="text-muted" style="font-size: 0.9rem;">Access your candidate profile or recruiter panel</p>
+      </div>
+
+      <form action="{{ url_for('auth.login') }}" method="POST" id="loginForm">
+        <!-- Secure CSRF / inputs -->
+        <div class="mb-3">
+          <label for="login_id" class="form-label font-title fw-semibold">Email or Username</label>
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="fa-regular fa-envelope"></i></span>
+            <input type="text" class="form-control form-control-custom border-start-0" id="login_id" name="login_id" required placeholder="Enter username or email">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <label for="password" class="form-label font-title fw-semibold m-0">Password</label>
+            <a href="{{ url_for('auth.forgot_password') }}" class="text-primary text-decoration-none" style="font-size: 0.85rem;">Forgot Password?</a>
+          </div>
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="fa-solid fa-key"></i></span>
+            <input type="password" class="form-control form-control-custom border-start-0" id="password" name="password" required placeholder="Password">
+          </div>
+        </div>
+
+        <div class="mb-4 form-check">
+          <input type="checkbox" class="form-check-input" id="remember" name="remember">
+          <label class="form-check-label text-muted" for="remember" style="font-size: 0.9rem;">Remember me on this device</label>
+        </div>
+
+        <button type="submit" class="btn btn-custom w-100 py-2">
+          <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In
+        </button>
+      </form>
+
+      <div class="text-center mt-4">
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">Don't have an account? <a href="{{ url_for('auth.register') }}" class="text-primary fw-semibold text-decoration-none">Register here</a></p>
+      </div>
+    </div>
+
+    <!-- Password Recovery Card -->
+    {% else %}
+    <div class="card glass-card p-4 shadow animate-fade-in">
+      <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded-circle mb-3" style="width: 60px; height: 60px;">
+          <i class="fa-solid fa-circle-question fs-3"></i>
+        </div>
+        <h3 class="font-title fw-bold">Recover Password</h3>
+        <p class="text-muted" style="font-size: 0.9rem;">Enter your email to receive recovery instructions</p>
+      </div>
+
+      <form action="{{ url_for('auth.forgot_password') }}" method="POST">
+        <div class="mb-4">
+          <label for="email" class="form-label font-title fw-semibold">Email Address</label>
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="fa-regular fa-envelope"></i></span>
+            <input type="email" class="form-control form-control-custom border-start-0" id="email" name="email" required placeholder="name@company.com">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-custom w-100 py-2 mb-2">
+          Send Recovery Instructions
+        </button>
+        
+        <a href="{{ url_for('auth.login') }}" class="btn btn-light w-100 py-2 font-title fw-semibold border text-muted">
+          Back to Login
+        </a>
+      </form>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

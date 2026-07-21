@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Jobs - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="font-title fw-bold m-0">Job Boards</h2>
+      <p class="text-muted mb-0">Create and modify target job requirements and matching profiles</p>
+    </div>
+    <button type="button" class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#createJobModal">
+      <i class="fa-solid fa-plus me-2"></i>Create Job Posting
+    </button>
+  </div>
+
+  <!-- Job postings List -->
+  <div class="row g-4">
+    {% if jobs %}
+      {% for job in jobs %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card glass-card shadow-sm h-100 p-4 d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <h5 class="font-title fw-bold mb-1 text-primary">{{ job.title }}</h5>
+              <span class="text-muted" style="font-size: 0.8rem;"><i class="fa-regular fa-building me-1"></i>{{ job.department }}</span>
+            </div>
+            <a href="{{ url_for('delete_job', job_id=job.id) }}" class="btn btn-sm btn-light border text-danger" onclick="return confirm('Are you sure you want to delete this job posting? This will delete all applications and scores linked to it.');">
+              <i class="fa-regular fa-trash-can"></i>
+            </a>
+          </div>
+          
+          <div class="my-3 flex-grow-1">
+            <h6 class="font-title fw-bold mb-1" style="font-size: 0.85rem;">Description Summary:</h6>
+            <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+              {{ job.description }}
+            </p>
+            
+            <h6 class="font-title fw-bold mb-1" style="font-size: 0.85rem;">Core Stack Required:</h6>
+            <div class="d-flex flex-wrap gap-1 mt-2">
+              {% for req in job.requirements.split(',') %}
+                {% if req.strip() %}
+                <span class="badge bg-light text-dark border">{{ req.strip() }}</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          
+          <div class="border-top pt-3 d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
+            <span class="text-muted">Experience: <strong>{{ job.experience_years }}+ Yrs</strong></span>
+            <span class="badge bg-primary bg-opacity-10 text-primary">{{ job.applications|length }} Applications</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12">
+        <div class="card glass-card text-center py-5 text-muted shadow-sm">
+          <i class="fa-solid fa-briefcase fs-1 mb-2 opacity-50"></i>
+          <h5>No Job Postings Found</h5>
+          <p class="mb-0">Create your first target job post by clicking the button above.</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Create Job Posting Modal -->
+  <div class="modal fade" id="createJobModal" tabindex="-1" aria-hidden="true" style="text-align: left;">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content glass-card border p-3">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title font-title fw-bold">Create Job Posting</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="{{ url_for('manage_jobs') }}" method="POST">
+          <div class="modal-body py-3">
+            
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="jobTitle" class="form-label font-title fw-semibold text-muted mb-1">JOB TITLE</label>
+                <input type="text" class="form-control form-control-custom" id="jobTitle" name="title" required placeholder="e.g. Senior Software Engineer">
+              </div>
+              <div class="col-md-6">
+                <label for="jobDepartment" class="form-label font-title fw-semibold text-muted mb-1">DEPARTMENT</label>
+                <input type="text" class="form-control form-control-custom" id="jobDepartment" name="department" required placeholder="e.g. Engineering">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="experienceYears" class="form-label font-title fw-semibold text-muted mb-1">REQUIRED EXPERIENCE (YEARS)</label>
+              <input type="number" class="form-control form-control-custom" id="experienceYears" name="experience_years" min="0" required placeholder="e.g. 3">
+            </div>
+
+            <div class="mb-3">
+              <label for="jobRequirements" class="form-label font-title fw-semibold text-muted mb-1">REQUIRED KEYWORDS/SKILLS (COMMA SEPARATED)</label>
+              <input type="text" class="form-control form-control-custom" id="jobRequirements" name="requirements" required placeholder="e.g. Python, Flask, SQLite, Machine Learning, spaCy">
+              <small class="text-muted">These will form the basis of the ATS Match score calculations.</small>
+            </div>
+
+            <div class="mb-0">
+              <label for="jobDescription" class="form-label font-title fw-semibold text-muted mb-1">JOB DESCRIPTION & REQUIREMENTS</label>
+              <textarea class="form-control form-control-custom" id="jobDescription" name="description" rows="5" required placeholder="Describe the job duties, qualifications, and company stack details..."></textarea>
+            </div>
+
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-light border px-4 font-title fw-bold text-muted" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-custom px-4">Create Job</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,1 @@
+from .report_generator import generate_resume_report_pdf

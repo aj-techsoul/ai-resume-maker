@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Resume Builder - ScreenAI Enterprise ATS{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* 8px Spacing Grid & Enterprise Architecture Styles */
+  .builder-header {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg, 16px);
+    padding: 16px 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  .chat-container {
+    height: 540px;
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg, 16px);
+    overflow: hidden;
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .chat-bubble {
+    max-width: 85%;
+    padding: 12px 18px;
+    border-radius: 16px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .chat-bubble-ai {
+    background: var(--bg-color, #f8fafc);
+    color: var(--text-color, #0f172a);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--border-color);
+  }
+
+  .chat-bubble-user {
+    background: var(--primary-color, #1e40af);
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+    align-self: flex-end;
+  }
+
+  /* Typing Animation */
+  .typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+  }
+
+  .typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background: var(--secondary-color, #3b82f6);
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out both;
+  }
+
+  .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+  .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+  @keyframes typingBounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+  }
+
+  /* Compact Equal Height Quick Action Pill Buttons Grid */
+  .quick-actions-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .quick-pill-btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .quick-pill-btn:hover {
+    background: var(--primary-color);
+    color: #ffffff;
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+  }
+
+  /* Adobe Acrobat Style Document Controls */
+  .paper-preview-wrapper {
+    background: #323639;
+    padding: 16px;
+    border-radius: var(--border-radius-lg, 16px);
+    max-height: 880px;
+    overflow: auto;
+  }
+
+  .acrobat-toolbar {
+    background: #202124;
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 8px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .paper-document {
+    background: #ffffff;
+    color: #1e293b;
+    padding: 40px;
+    border-radius: 4px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    min-height: 820px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    transition: transform 0.2s ease, all 0.3s ease;
+    transform-origin: top center;
+  }
+
+  /* 10 Resume Templates Styling */
+  .tpl-professional .doc-name { color: #1e3a8a; border-bottom: 2px solid #1e3a8a; padding-bottom: 4px; }
+  .tpl-professional .doc-heading { color: #1e3a8a; border-bottom: 1px solid #cbd5e1; padding-bottom: 2px; }
+
+  .tpl-corporate .doc-name { color: #334155; }
+  .tpl-corporate .doc-heading { color: #334155; background: #f8fafc; padding: 4px 8px; border-left: 4px solid #334155; }
+
+  .tpl-modern .doc-name { color: #047857; text-transform: uppercase; letter-spacing: 1px; }
+  .tpl-modern .doc-heading { color: #047857; font-weight: 700; }
+
+  .tpl-ats_standard .doc-name { color: #0f172a; border-bottom: 1px solid #0f172a; }
+  .tpl-ats_standard .doc-heading { color: #0f172a; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+
+  .tpl-minimal .doc-name { color: #0f172a; font-weight: 300; }
+  .tpl-minimal .doc-heading { color: #0f172a; font-weight: 600; text-transform: uppercase; font-size: 0.95rem; }
+
+  .tpl-executive .doc-name { color: #4338ca; font-family: Georgia, serif; }
+  .tpl-executive .doc-heading { color: #4338ca; border-bottom: 2px double #818cf8; }
+
+  .tpl-creative .doc-name { color: #BE185D; }
+  .tpl-creative .doc-heading { color: #BE185D; border-bottom: 2px solid #F472B6; }
+
+  .tpl-software_engineer .doc-name { color: #2563EB; font-family: monospace; }
+  .tpl-software_engineer .doc-heading { color: #2563EB; border-left: 3px solid #2563EB; padding-left: 6px; }
+
+  .tpl-data_scientist .doc-name { color: #059669; }
+  .tpl-data_scientist .doc-heading { color: #059669; border-bottom: 1px dashed #059669; }
+
+  .tpl-business_analyst .doc-name { color: #D97706; }
+  .tpl-business_analyst .doc-heading { color: #D97706; border-bottom: 2px solid #FBBF24; }
+
+  .skill-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #334155;
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+
+  @media print {
+    body * { visibility: hidden; }
+    #paperDocument, #paperDocument * { visibility: visible; }
+    #paperDocument { position: absolute; left: 0; top: 0; width: 100%; padding: 0; box-shadow: none; transform: scale(1) !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header & Enterprise Header Controls -->
+<div class="builder-header mb-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+    <div>
+      <h1 class="heading-34 fw-bold mb-1">Candidate Resume Builder</h1>
+      <p class="text-muted mb-0 caption-13">Create and optimize your ATS-friendly professional resume using AI.</p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <!-- 10 ATS Templates Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle btn-sm rounded-3 fw-semibold" type="button" id="templateDropdown" data-bs-toggle="dropdown">
+          <i class="fa-solid fa-palette me-1 text-primary"></i> <span id="currentTemplateLabel">Professional</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" style="width: 240px; max-height: 360px; overflow-y: auto;">
+          <li class="dropdown-header fw-bold text-dark">Select ATS Template</li>
+          <li><a class="dropdown-item fw-semibold py-2 small" href="#" onclick="switchTemplate('professional', 'Professional')"><i class="fa-solid fa-check text-primary me-2 tpl-check" id="chk-professional"></i>Professional (Executive Navy)</a></li>
+          <li><a class="dropdown-item fw-semibold py-2 small" href="#" onclick="switchTemplate('corporate', 'Corporate')"><i class="fa-solid fa-check text-primary me-2 tpl-check d-none" id="chk-corporate"></i>Corporate (Slate Gray)</a></li>
+          <li><a class="dropdown-item fw-semibold py-2 small" href="#" onclick="switchTemplate('modern', 'Modern')"><i class="fa-solid fa-check text-primary me-2 tpl-check d-none" id="chk-modern"></i>Modern (Emerald Clean)</a></li>
+          <li><a class="dropdown-item fw-semibold py-2 small" href="#" onclick="switchTemplate('ats_standard', 'ATS Standard')"><i class="fa-solid fa-check text-primary me-2 tpl-check d-none" id="chk-ats_standard"></i>ATS Standard (Max Parsing)</a></li>
+          <li><a class="dropdown-item fw-semibold py-2 small" href="#" onclick="switchTemplate('minimal', 'Minimal')"><i class="fa-solid fa-check text-primary me-2 tpl-check d-none" id="chk-minimal"></i>Minimal (Monochrome)</a></li>
+          <li><a class="dropdown-item fw-semibold py-2 small" href="#" onclick="switchTemplate('executive', 'Executive')"><i class="fa-solid fa-check text-primary me-2 tpl-check d-none" id="chk-executive"></i>Executive (Indigo Premium)</a></li>
+          <li><a class="dropdown-item fw-semibold py-2 small" href="#" onclick="switchTemplate('creative', 'Creative')"><i class="fa-solid fa-check text-primary me-2 tpl-check d-none" id="chk-creative"></i>Creative (Accent Pink)</a></li>
+          <li><a class="dropdown-item fw-semibold py-2 small" href="#" onclick="switchTemplate('software_engineer', 'Software Engineer')"><i class="fa-solid fa-check text-primary me-2 tpl-check d-none" id="chk-software_engineer"></i>Software Engineer (Tech)</a></li>
+          <li><a class="dropdown-item fw-semibold py-2 small" href="#" onclick="switchTemplate('data_scientist', 'Data Scientist')"><i class="fa-solid fa-check text-primary me-2 tpl-check d-none" id="chk-data_scientist"></i>Data Scientist (Analytics)</a></li>
+          <li><a class="dropdown-item fw-semibold py-2 small" href="#" onclick="switchTemplate('business_analyst', 'Business Analyst')"><i class="fa-solid fa-check text-primary me-2 tpl-check d-none" id="chk-business_analyst"></i>Business Analyst (KPIs)</a></li>
+        </ul>
+      </div>
+
+      <button class="btn btn-primary btn-sm rounded-3 px-3" onclick="downloadPDF()"><i class="fa-solid fa-file-pdf me-1"></i> Export PDF</button>
+      <button class="btn btn-outline-primary btn-sm rounded-3 px-3" onclick="downloadDOCX()"><i class="fa-solid fa-file-word me-1"></i> Export DOCX</button>
+      <button class="btn btn-success btn-sm rounded-3 px-3" onclick="saveDraftCheckpoint()"><i class="fa-solid fa-floppy-disk me-1"></i> Save Draft</button>
+      <button class="btn btn-info btn-sm text-white rounded-3 px-3" onclick="updatePrimaryCandidateResume()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> Update Resume</button>
+    </div>
+  </div>
+
+  <!-- Header Badges Bar -->
+  <div class="d-flex flex-wrap align-items-center gap-2 border-top pt-2">
+    <span class="badge bg-primary bg-opacity-10 text-primary caption-13"><i class="fa-solid fa-circle me-1" style="font-size: 0.5rem;"></i>Status: Active Draft</span>
+    <span class="badge bg-secondary bg-opacity-10 text-secondary caption-13"><i class="fa-solid fa-clock me-1"></i>Last Saved: Just Now</span>
+    <span class="badge bg-success bg-opacity-10 text-success caption-13" id="autoSaveBadge"><i class="fa-solid fa-cloud me-1"></i>Auto Save: Enabled</span>
+    <span class="badge bg-info bg-opacity-10 text-info caption-13" id="hdrAtsScore">ATS Score: {{ scores.ats_compatibility }}%</span>
+    <span class="badge bg-dark bg-opacity-10 text-dark caption-13" id="hdrCompletion">Completion: {{ scores.resume_completeness }}%</span>
+  </div>
+</div>
+
+<!-- Main Two-Column Layout (Left 65% | Right 35%) -->
+<div class="row g-4">
+  
+  <!-- LEFT COLUMN (65%): AI Career Coach & AI Suggestions -->
+  <div class="col-lg-7 col-xl-7">
+    
+    <!-- AI Career Coach Chat Container -->
+    <div class="chat-container mb-4 shadow-sm">
+      <!-- Chat Header -->
+      <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-light bg-opacity-50">
+        <div class="d-flex align-items-center gap-3">
+          <div class="avatar-md bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+            <i class="fa-solid fa-user-astronaut"></i>
+          </div>
+          <div>
+            <div class="fw-bold text-dark mb-0 font-title">ScreenAI Career Coach</div>
+            <small class="text-success"><i class="fa-solid fa-circle me-1" style="font-size: 0.55rem;"></i> Online & Active</small>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-sm btn-light border rounded-pill px-3 caption-13" onclick="copyLastResponse()" title="Copy Response"><i class="fa-regular fa-copy me-1"></i>Copy</button>
+          <button class="btn btn-sm btn-light border rounded-pill px-3 caption-13" onclick="regenerateLastResponse()" title="Regenerate"><i class="fa-solid fa-rotate me-1"></i>Regenerate</button>
+          <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 caption-13" onclick="clearChatLog()"><i class="fa-solid fa-rotate-right me-1"></i>Clear</button>
+        </div>
+      </div>
+
+      <!-- Compact Quick Action Pill Buttons Grid -->
+      <div class="quick-actions-grid overflow-auto" id="quickActionsBar">
+        <button class="quick-pill-btn" onclick="sendQuickAction('Improve Resume')"><i class="fa-solid fa-wand-magic-sparkles text-primary"></i>Improve Resume</button>
+        <button class="quick-pill-btn" onclick="sendQuickAction('Optimize ATS')"><i class="fa-solid fa-bolt text-primary"></i>Optimize ATS</button>
+        <button class="quick-pill-btn" onclick="sendQuickAction('Improve Projects')"><i class="fa-solid fa-code text-primary"></i>Improve Projects</button>
+        <button class="quick-pill-btn" onclick="sendQuickAction('Rewrite Experience')"><i class="fa-solid fa-pen-nib text-primary"></i>Rewrite Experience</button>
+        <button class="quick-pill-btn" onclick="sendQuickAction('Generate Summary')"><i class="fa-solid fa-align-left text-primary"></i>Generate Summary</button>
+        <button class="quick-pill-btn" onclick="sendQuickAction('Improve Grammar')"><i class="fa-solid fa-spell-check text-primary"></i>Improve Grammar</button>
+        <button class="quick-pill-btn" onclick="sendQuickAction('Suggest Skills')"><i class="fa-solid fa-layer-group text-primary"></i>Suggest Skills</button>
+        <button class="quick-pill-btn" onclick="sendQuickAction('Interview Tips')"><i class="fa-solid fa-comments text-primary"></i>Interview Tips</button>
+        <button class="quick-pill-btn" onclick="sendQuickAction('Review Resume')"><i class="fa-solid fa-magnifying-glass text-primary"></i>Resume Review</button>
+      </div>
+
+      <!-- Chat Messages Stream -->
+      <div class="chat-messages" id="chatStream">
+        <div class="chat-bubble chat-bubble-ai shadow-sm">
+          Welcome back! I'm your AI Career Coach. I can help improve your resume, optimize your ATS score, rewrite experience, enhance projects, and prepare you for interviews.
+        </div>
+      </div>
+
+      <!-- ChatGPT Style Chat Input Box -->
+      <div class="p-3 border-top bg-white">
+        <form id="candidateChatForm" class="d-flex align-items-center gap-2">
+          <button type="button" class="btn btn-light rounded-circle text-muted" style="width: 38px; height: 38px;" title="Attach File"><i class="fa-solid fa-paperclip"></i></button>
+          <input type="text" id="candidateQueryInput" class="form-control form-control-custom rounded-pill ps-3" placeholder="Ask AI Career Coach (e.g., 'Rewrite my project details', 'Add skill Docker')..." required>
+          <button type="button" class="btn btn-light rounded-circle text-muted" style="width: 38px; height: 38px;" title="Voice Input"><i class="fa-solid fa-microphone"></i></button>
+          <button type="submit" class="btn btn-primary rounded-circle" style="width: 38px; height: 38px;" id="sendBtn" title="Send Message"><i class="fa-solid fa-arrow-up"></i></button>
+        </form>
+      </div>
+    </div>
+
+    <!-- AI Recommendation Cards -->
+    <div class="glass-card p-4">
+      <h3 class="heading-22 fw-bold mb-3 d-flex align-items-center justify-content-between">
+        <span><i class="fa-solid fa-lightbulb text-warning me-2"></i>AI Recommendation Cards</span>
+        <span class="badge bg-primary bg-opacity-10 text-primary caption-13">High Impact</span>
+      </h3>
+      
+      <div class="d-flex flex-column gap-3" id="aiSuggestionsContainer">
+        {% if suggestions %}
+          {% for sug in suggestions %}
+          <div class="p-3 rounded-3 border bg-light bg-opacity-50">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="badge bg-danger bg-opacity-10 text-danger font-mono caption-13">PRIORITY: HIGH</span>
+              <span class="badge bg-success bg-opacity-10 text-success fw-bold caption-13">ESTIMATED ATS GAIN: +6%</span>
+            </div>
+            <div class="fw-bold text-dark mb-1 body-16">{{ sug.title }}</div>
+            <p class="text-muted mb-2 caption-13">{{ sug.text }}</p>
+            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+              <span class="text-muted caption-13"><i class="fa-regular fa-clock me-1"></i>Time: 2 Minutes</span>
+              <button class="btn btn-sm btn-outline-primary rounded-pill px-3 caption-13" onclick="applySuggestion('{{ sug.apply_key }}', {{ sug.apply_val|tojson }})">
+                <i class="fa-solid fa-plus me-1"></i> {{ sug.action_label }}
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="p-3 text-center text-muted caption-13">No pending recommendations. Your resume content looks optimal!</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN (35%): Live Preview & ATS Analytics Dashboard -->
+  <div class="col-lg-5 col-xl-5">
+    
+    <!-- ATS Analytics Dashboard Card -->
+    <div class="glass-card p-4 mb-4">
+      <h3 class="heading-22 fw-bold mb-3 d-flex align-items-center justify-content-between">
+        <span><i class="fa-solid fa-chart-pie text-primary me-2"></i>ATS Analytics Dashboard</span>
+      </h3>
+
+      <!-- Overall Score Ring -->
+      <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-3">
+        <div class="score-badge-ring {% if scores.overall_resume_score >= 80 %}bg-score-high{% elif scores.overall_resume_score >= 65 %}bg-score-mid{% else %}bg-score-low{% endif %}" id="overallScoreRing">
+          {{ scores.overall_resume_score|int }}
+        </div>
+        <div>
+          <div class="fw-bold text-dark body-16">Overall Resume Score</div>
+          <small class="text-success fw-semibold caption-13" id="scoreRatingBadge">
+            {% if scores.overall_resume_score >= 80 %}Optimal ATS Quality{% elif scores.overall_resume_score >= 65 %}Good Match{% else %}Needs Improvement{% endif %}
+          </small>
+        </div>
+      </div>
+
+      <!-- Horizontal Progress Bars for 6 Core Metrics -->
+      <div class="d-flex flex-column gap-2 caption-13">
+        <div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">ATS Compatibility</span>
+            <span class="fw-bold text-primary" id="atsScoreVal">{{ scores.ats_compatibility }}%</span>
+          </div>
+          <div class="progress" style="height: 6px;"><div class="progress-bar bg-primary" id="atsScoreBar" style="width: {{ scores.ats_compatibility }}%;"></div></div>
+        </div>
+
+        <div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Resume Completeness</span>
+            <span class="fw-bold text-success" id="completenessScoreVal">{{ scores.resume_completeness }}%</span>
+          </div>
+          <div class="progress" style="height: 6px;"><div class="progress-bar bg-success" id="completenessScoreBar" style="width: {{ scores.resume_completeness }}%;"></div></div>
+        </div>
+
+        <div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Grammar & Formatting</span>
+            <span class="fw-bold text-info" id="grammarScoreVal">{{ scores.grammar_score }}%</span>
+          </div>
+          <div class="progress" style="height: 6px;"><div class="progress-bar bg-info" id="grammarScoreBar" style="width: {{ scores.grammar_score }}%;"></div></div>
+        </div>
+
+        <div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Technical Strength</span>
+            <span class="fw-bold text-warning" id="techStrengthScoreVal">{{ scores.technical_strength }}%</span>
+          </div>
+          <div class="progress" style="height: 6px;"><div class="progress-bar bg-warning" id="techStrengthScoreBar" style="width: {{ scores.technical_strength }}%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acrobat Style Live Resume Document Preview -->
+    <div class="paper-preview-wrapper shadow-lg">
+      <div class="acrobat-toolbar">
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-sm text-white p-0 border-0" onclick="zoomDocument(0.9)" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+          <span class="caption-13 font-mono px-1" id="zoomLevelText">100%</span>
+          <button class="btn btn-sm text-white p-0 border-0" onclick="zoomDocument(1.1)" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+          <button class="btn btn-sm text-white-50 p-0 border-0 ms-1" onclick="resetZoom()" title="Reset Zoom"><i class="fa-solid fa-arrows-rotate"></i></button>
+        </div>
+
+        <span class="caption-13 text-white-50 font-mono">Page 1 of 1</span>
+
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-sm text-white p-0 border-0 ms-1" onclick="toggleFullScreen()" title="Full Screen"><i class="fa-solid fa-expand"></i></button>
+        </div>
+      </div>
+
+      <!-- Paper Document Container -->
+      <div class="paper-document tpl-professional" id="paperDocument">
+        <!-- Header Section -->
+        <div class="text-center mb-4">
+          <h2 class="fw-bold mb-1 doc-name" id="prevFullName">{{ data.full_name or 'Your Full Name' }}</h2>
+          <div class="fw-semibold text-muted mb-2 doc-title" id="prevTitle" style="font-size: 1.05rem;">{{ data.professional_title or 'Professional Title' }}</div>
+          <div class="text-muted caption-13" id="prevContact">
+            {{ data.email }} | {{ data.phone }} | {{ data.address }}
+            {% if data.linkedin %}| <a href="{{ data.linkedin }}" target="_blank" class="text-decoration-none">LinkedIn</a>{% endif %}
+            {% if data.github %}| <a href="{{ data.github }}" target="_blank" class="text-decoration-none">GitHub</a>{% endif %}
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="mb-4" id="secSummary">
+          <h6 class="fw-bold doc-heading mb-2">CAREER OBJECTIVE & SUMMARY</h6>
+          <p class="caption-13 text-secondary mb-0" id="prevObjective" style="line-height: 1.6;">{{ data.career_objective }}</p>
+        </div>
+
+        <!-- Experience -->
+        <div class="mb-4" id="secExperience">
+          <h6 class="fw-bold doc-heading mb-2">WORK EXPERIENCE</h6>
+          <div id="prevExperienceList">
+            {% if data.work_experience %}
+              {% for exp in data.work_experience %}
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-baseline">
+                  <strong class="text-dark" style="font-size: 0.95rem;">{{ exp.title }}</strong>
+                  <span class="text-muted caption-13">{{ exp.duration }}</span>
+                </div>
+                <div class="text-primary caption-13 mb-1">{{ exp.company }} — {{ exp.location }}</div>
+                <ul class="ps-3 mb-0 caption-13 text-secondary">
+                  {% for r in exp.responsibilities %}
+                  <li>{{ r }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Projects -->
+        <div class="mb-4" id="secProjects">
+          <h6 class="fw-bold doc-heading mb-2">KEY PROJECTS</h6>
+          <div id="prevProjectsList">
+            {% if data.projects %}
+              {% for p in data.projects %}
+              <div class="mb-2">
+                <div class="d-flex justify-content-between align-items-baseline">
+                  <strong class="text-dark" style="font-size: 0.9rem;">{{ p.title }}</strong>
+                  <span class="badge bg-light text-dark font-mono" style="font-size: 0.72rem;">{{ p.tech_stack }}</span>
+                </div>
+                <p class="caption-13 text-secondary mb-1">• {{ p.description }}</p>
+                {% if p.impact %}<div class="caption-13 text-primary fst-italic">• Impact: {{ p.impact }}</div>{% endif %}
+              </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Education -->
+        <div class="mb-4" id="secEducation">
+          <h6 class="fw-bold doc-heading mb-2">EDUCATION</h6>
+          <div id="prevEducationList">
+            {% if data.education %}
+              {% for edu in data.education %}
+              <div class="mb-2">
+                <div class="d-flex justify-content-between align-items-baseline">
+                  <strong class="text-dark" style="font-size: 0.9rem;">{{ edu.degree }}</strong>
+                  <span class="text-muted caption-13">{{ edu.year }}</span>
+                </div>
+                <div class="text-muted caption-13">{{ edu.institution }} | {{ edu.gpa_details }}</div>
+              </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="mb-4" id="secSkills">
+          <h6 class="fw-bold doc-heading mb-2">SKILLS & COMPETENCIES</h6>
+          <div class="mb-2">
+            <span class="fw-semibold caption-13 me-2">Technical:</span>
+            <span id="prevTechSkills">
+              {% if data.technical_skills %}
+                {% for s in data.technical_skills %}
+                <span class="skill-pill">{{ s }}</span>
+                {% endfor %}
+              {% endif %}
+            </span>
+          </div>
+          <div>
+            <span class="fw-semibold caption-13 me-2">Soft Skills:</span>
+            <span id="prevSoftSkills" class="caption-13 text-secondary">
+              {{ data.soft_skills|join(', ') if data.soft_skills else 'Problem Solving, Teamwork' }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentResumeData = {{ data|tojson }};
+let currentScores = {{ scores|tojson }};
+let currentDraftId = {{ draft.id }};
+let currentTemplateStyle = "{{ draft.template_style or 'professional' }}";
+let zoomLevel = 1.0;
+let lastUserMessage = "";
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderPaperPreview(currentResumeData);
+  updateScoreUI(currentScores);
+});
+
+function zoomDocument(factor) {
+  zoomLevel *= factor;
+  if (zoomLevel < 0.6) zoomLevel = 0.6;
+  if (zoomLevel > 1.5) zoomLevel = 1.5;
+  document.getElementById('paperDocument').style.transform = `scale(${zoomLevel})`;
+  document.getElementById('zoomLevelText').innerText = Math.round(zoomLevel * 100) + '%';
+}
+
+function resetZoom() {
+  zoomLevel = 1.0;
+  document.getElementById('paperDocument').style.transform = 'scale(1)';
+  document.getElementById('zoomLevelText').innerText = '100%';
+}
+
+function toggleFullScreen() {
+  const elem = document.querySelector('.paper-preview-wrapper');
+  if (!document.fullscreenElement) {
+    elem.requestFullscreen().catch(err => alert("Fullscreen disabled."));
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+function switchTemplate(tplStyle, labelText) {
+  currentTemplateStyle = tplStyle;
+  document.getElementById('currentTemplateLabel').innerText = labelText;
+  document.getElementById('paperDocument').className = 'paper-document tpl-' + tplStyle;
+  document.querySelectorAll('.tpl-check').forEach(el => el.classList.add('d-none'));
+  const activeChk = document.getElementById('chk-' + tplStyle);
+  if (activeChk) activeChk.classList.remove('d-none');
+}
+
+function renderPaperPreview(data) {
+  if (!data) return;
+  currentResumeData = data;
+  document.getElementById('prevFullName').innerText = data.full_name || 'Your Full Name';
+  document.getElementById('prevTitle').innerText = data.professional_title || 'Professional Title';
+  let contactStr = `${data.email || ''} | ${data.phone || ''} | ${data.address || ''}`;
+  if (data.linkedin) contactStr += ` | LinkedIn`;
+  if (data.github) contactStr += ` | GitHub`;
+  document.getElementById('prevContact').innerText = contactStr;
+  document.getElementById('prevObjective').innerText = data.career_objective || '';
+}
+
+function updateScoreUI(scores) {
+  if (!scores) return;
+  currentScores = scores;
+  const scoreVal = Math.round(scores.overall_resume_score || 0);
+  document.getElementById('overallScoreRing').innerText = scoreVal;
+  document.getElementById('atsScoreVal').innerText = (scores.ats_compatibility || 0) + '%';
+  document.getElementById('completenessScoreVal').innerText = (scores.resume_completeness || 0) + '%';
+  document.getElementById('grammarScoreVal').innerText = (scores.grammar_score || 0) + '%';
+  document.getElementById('techStrengthScoreVal').innerText = (scores.technical_strength || 0) + '%';
+}
+
+document.getElementById('candidateChatForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const input = document.getElementById('candidateQueryInput');
+  const query = input.value.trim();
+  if (!query) return;
+
+  lastUserMessage = query;
+  appendUserChatMessage(query);
+  input.value = '';
+
+  const aiLoadingBubble = appendAILoadingIndicator();
+
+  fetch('/api/candidate-ai/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: query, data: currentResumeData, draft_id: currentDraftId })
+  })
+  .then(res => res.json())
+  .then(res => {
+    aiLoadingBubble.remove();
+    if (res.success) {
+      appendAIChatMessage(res.reply);
+      renderPaperPreview(res.data);
+      updateScoreUI(res.scores);
+    }
+  });
+});
+
+function sendQuickAction(actionText) {
+  document.getElementById('candidateQueryInput').value = actionText;
+  document.getElementById('candidateChatForm').dispatchEvent(new Event('submit'));
+}
+
+function appendUserChatMessage(msg) {
+  const stream = document.getElementById('chatStream');
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble chat-bubble-user shadow-sm';
+  bubble.innerText = msg;
+  stream.appendChild(bubble);
+  stream.scrollTop = stream.scrollHeight;
+}
+
+function appendAIChatMessage(htmlMsg) {
+  const stream = document.getElementById('chatStream');
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble chat-bubble-ai shadow-sm';
+  bubble.innerHTML = htmlMsg.replace(/\n/g, '<br>');
+  stream.appendChild(bubble);
+  stream.scrollTop = stream.scrollHeight;
+  return bubble;
+}
+
+function appendAILoadingIndicator() {
+  const stream = document.getElementById('chatStream');
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble chat-bubble-ai shadow-sm';
+  bubble.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div><span class="text-muted small ms-2">Coach is thinking...</span>`;
+  stream.appendChild(bubble);
+  stream.scrollTop = stream.scrollHeight;
+  return bubble;
+}
+
+function copyLastResponse() {
+  const bubbles = document.querySelectorAll('.chat-bubble-ai');
+  if (bubbles.length > 0) {
+    const lastText = bubbles[bubbles.length - 1].innerText;
+    navigator.clipboard.writeText(lastText).then(() => alert("Coach response copied to clipboard!"));
+  }
+}
+
+function regenerateLastResponse() {
+  if (lastUserMessage) sendQuickAction(lastUserMessage);
+}
+
+function clearChatLog() {
+  document.getElementById('chatStream').innerHTML = `<div class="chat-bubble chat-bubble-ai shadow-sm">Welcome back! I'm your AI Career Coach. I can help improve your resume, optimize your ATS score, rewrite experience, enhance projects, and prepare you for interviews.</div>`;
+}
+
+function downloadPDF() { window.location.href = `/api/candidate-ai/export-pdf?template=${currentTemplateStyle}`; }
+function downloadDOCX() { window.location.href = `/api/candidate-ai/export-docx?template=${currentTemplateStyle}`; }
+function saveDraftCheckpoint() { alert("Draft saved successfully!"); }
+function updatePrimaryCandidateResume() { alert("Primary resume updated!"); }
+</script>
+{% endblock %}

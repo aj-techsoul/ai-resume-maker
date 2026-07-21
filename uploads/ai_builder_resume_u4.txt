@@ -1,0 +1,11 @@
+
+FULL NAME: n
+TITLE: Full Stack Software Engineer
+EMAIL: n@gmail.com | PHONE: +1 (555) 234-5678
+LOCATION: San Francisco, CA
+SUMMARY: Results-driven Software Engineer with 3+ years of experience crafting high-scalable web applications, optimizing microservices, and leading cross-functional teams.
+EDUCATION: [{"degree": "B.S. in Computer Science", "gpa_details": "GPA 3.8/4.0 - Dean's List", "institution": "University of Technology", "year": "2019 - 2023"}]
+EXPERIENCE: [{"company": "Tech Solutions Inc.", "duration": "2023 - Present", "location": "San Francisco, CA", "responsibilities": ["Engineered RESTful APIs serving over 100k daily active users with 99.9% uptime.", "Optimized database query performance by 40% through indexing and caching strategies.", "Collaborated with product teams to roll out automated deployment pipelines."], "title": "Software Engineer"}]
+PROJECTS: [{"description": "Architected an interactive career assistant app providing real-time ATS scoring and instant resume generation.", "impact": "Reduced user resume creation time by 60% with instant template exporting.", "tech_stack": "Python, Flask, React, SQLite", "title": "AI Resume Builder & Screener"}]
+SKILLS: Python, JavaScript, React, Flask, SQL, Git, Docker, REST APIs
+    

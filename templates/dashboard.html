@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}Executive HR Dashboard - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="font-title fw-bold m-0">Recruiter Panel</h2>
+      <p class="text-muted mb-0">Overview of candidate screening, AI matching results, and upcoming schedules</p>
+    </div>
+    <a href="{{ url_for('manage_jobs') }}" class="btn btn-custom">
+      <i class="fa-solid fa-plus me-2"></i>Post New Job
+    </a>
+  </div>
+
+  <!-- Executive 8 KPI Cards Row -->
+  <div class="row g-3 mb-4">
+    
+    <!-- Total Candidates -->
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card glass-card kpi-card p-3 shadow-sm border-0 h-100">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted font-title fw-semibold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">TOTAL TALENT</span>
+            <h3 class="fw-bold m-0">{{ kpis.total_candidates }}</h3>
+          </div>
+          <div class="kpi-icon">
+            <i class="fa-solid fa-users"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Applications -->
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card glass-card kpi-card p-3 shadow-sm border-0 h-100">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted font-title fw-semibold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">TODAY'S APPS</span>
+            <h3 class="fw-bold m-0">{{ kpis.todays_apps }}</h3>
+          </div>
+          <div class="kpi-icon bg-info bg-opacity-10 text-info">
+            <i class="fa-regular fa-clock"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Job Openings -->
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card glass-card kpi-card p-3 shadow-sm border-0 h-100">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted font-title fw-semibold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">ACTIVE OPENINGS</span>
+            <h3 class="fw-bold m-0">{{ kpis.active_jobs }}</h3>
+          </div>
+          <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+            <i class="fa-solid fa-briefcase"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Average ATS Score -->
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card glass-card kpi-card p-3 shadow-sm border-0 h-100">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted font-title fw-semibold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">AVG MATCH SCORE</span>
+            <h3 class="fw-bold m-0">{{ kpis.avg_ats_score }}%</h3>
+          </div>
+          <div class="kpi-icon bg-success bg-opacity-10 text-success">
+            <i class="fa-solid fa-square-poll-vertical"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Candidates Shortlisted -->
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card glass-card kpi-card p-3 shadow-sm border-0 h-100">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted font-title fw-semibold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">SHORTLISTED</span>
+            <h3 class="fw-bold m-0">{{ kpis.shortlisted }}</h3>
+          </div>
+          <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+            <i class="fa-regular fa-circle-check"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interviews Scheduled -->
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card glass-card kpi-card p-3 shadow-sm border-0 h-100">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted font-title fw-semibold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">INTERVIEWS BOOKED</span>
+            <h3 class="fw-bold m-0">{{ kpis.interviews }}</h3>
+          </div>
+          <div class="kpi-icon bg-purple bg-opacity-10 text-purple" style="color: #8b5cf6;">
+            <i class="fa-regular fa-calendar-days"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hiring Success Rate -->
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card glass-card kpi-card p-3 shadow-sm border-0 h-100">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted font-title fw-semibold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">SUCCESS RATE</span>
+            <h3 class="fw-bold m-0">{{ kpis.success_rate }}</h3>
+          </div>
+          <div class="kpi-icon bg-success bg-opacity-10 text-success">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Processing Speed -->
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card glass-card kpi-card p-3 shadow-sm border-0 h-100">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted font-title fw-semibold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">AI LATENCY</span>
+            <h3 class="fw-bold m-0">{{ kpis.processing_time }}</h3>
+          </div>
+          <div class="kpi-icon bg-danger bg-opacity-10 text-danger">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row g-4 mb-4">
+    
+    <!-- Timeline -->
+    <div class="col-lg-7">
+      <div class="card glass-card p-4 h-100 shadow-sm border-0">
+        <h5 class="font-title fw-bold mb-3">Applications Progression</h5>
+        <div style="height: 280px; position: relative;">
+          <canvas id="dailyAppsChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Skills -->
+    <div class="col-lg-5">
+      <div class="card glass-card p-4 h-100 shadow-sm border-0">
+        <h5 class="font-title fw-bold mb-3">Identified Skills Heatmap</h5>
+        <div style="height: 280px; position: relative;">
+          <canvas id="skillsChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Lower Tables Row -->
+  <div class="row g-4">
+    
+    <!-- Recent Applications -->
+    <div class="col-lg-7">
+      <div class="card glass-card p-4 shadow-sm border-0 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="font-title fw-bold m-0">Recent Candidate Uploads</h5>
+          <a href="{{ url_for('admin_portal') }}" class="text-secondary text-decoration-none font-title fw-semibold" style="font-size: 0.85rem; color: var(--secondary-color) !important;">Manage Candidates</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
+            <thead>
+              <tr class="text-muted">
+                <th>Candidate Name</th>
+                <th>Resume Document</th>
+                <th>Time Logged</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if kpis.recent_uploads %}
+                {% for item in kpis.recent_uploads %}
+                <tr>
+                  <td class="fw-bold">{{ item.name }}</td>
+                  <td class="text-truncate" style="max-width: 200px;">{{ item.filename }}</td>
+                  <td class="text-muted">{{ item.time }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="3" class="text-center py-4 text-muted">No resume applications currently logged.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Job Postings -->
+    <div class="col-lg-5">
+      <div class="card glass-card p-4 shadow-sm border-0 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="font-title fw-bold m-0">Active Job Postings</h5>
+          <span class="badge bg-primary rounded-pill px-2 py-1">{{ active_jobs|length }} Postings</span>
+        </div>
+        <div class="list-group list-group-flush" style="font-size: 0.88rem;">
+          {% if active_jobs %}
+            {% for job in active_jobs[:4] %}
+            <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
+              <div>
+                <h6 class="font-title fw-bold mb-1" style="color: var(--text-color);">{{ job.title }}</h6>
+                <span class="text-muted" style="font-size: 0.78rem;">{{ job.department }} &bull; {{ job.experience_years }}+ Yrs Experience</span>
+              </div>
+              <span class="badge bg-light text-dark border rounded-pill px-2 py-1" style="font-size: 0.75rem;">{{ job.applications|length }} applied</span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="py-4 text-center text-muted">No job postings created.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- JSON payload for graphs.js -->
+<script id="analyticsData" type="application/json">
+  {{ chart_data | safe }}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

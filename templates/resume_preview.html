@@ -1,0 +1,588 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Analysis - {{ candidate.full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .preview-pane {
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
+    border-radius: var(--border-radius-md);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+  }
+  .parsed-resume-content {
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    padding: 24px;
+    transition: font-size 0.2s;
+    color: #1e293b;
+  }
+  .feedback-scroll {
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
+  }
+  .nav-tabs-custom {
+    border-bottom: 2px solid var(--border-color);
+  }
+  .nav-tabs-custom .nav-link {
+    border: none;
+    font-family: var(--font-title);
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 10px 16px;
+    margin-right: 10px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-tabs-custom .nav-link:hover {
+    color: var(--primary-color);
+  }
+  .nav-tabs-custom .nav-link.active {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    background: none;
+  }
+  mark.highlight-present {
+    background-color: #d1fae5;
+    color: #065f46;
+    padding: 1px 3px;
+    border-radius: 4px;
+  }
+  mark.highlight-repeated {
+    background-color: #fef3c7;
+    color: #92400e;
+    padding: 1px 3px;
+    border-radius: 4px;
+    border: 1px dashed #f59e0b;
+  }
+  mark.highlight-search {
+    background-color: #fef08a;
+    color: #854d0e;
+    padding: 1px 3px;
+    border-radius: 4px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  
+  <!-- Breadcrumbs & Toolbar Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <a href="{{ url_for('admin_portal') }}" class="text-decoration-none text-muted mb-2 d-inline-block" style="font-size: 0.85rem;">
+        <i class="fa-solid fa-arrow-left-long me-1"></i> Return to Talent Database
+      </a>
+      <h3 class="font-title fw-bold m-0">{{ candidate.full_name }}</h3>
+      <p class="text-muted mb-0">Role Applied: <strong>{{ job.title }}</strong> &bull; {{ job.department }}</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('download_report_pdf', score_id=score.id) }}" class="btn btn-custom">
+        <i class="fa-regular fa-file-pdf me-2"></i>Download PDF Report
+      </a>
+      <a href="{{ url_for('download_resume', resume_id=resume.id) }}" class="btn btn-light border font-title fw-bold text-muted">
+        <i class="fa-solid fa-download me-2"></i>Original File
+      </a>
+    </div>
+  </div>
+
+  <!-- Split Screen Layout -->
+  <div class="row g-4">
+    
+    <!-- Left Pane: Resume Text Content Viewer -->
+    <div class="col-lg-6">
+      <div class="card glass-card shadow-sm h-100 border-0">
+        
+        <!-- Controls Toolbar -->
+        <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-2 px-3">
+          <span class="font-title fw-bold text-muted" style="font-size: 0.75rem; letter-spacing: 0.5px;">RESUME TEXT SCREEN</span>
+          <div class="d-flex gap-2 align-items-center">
+            <!-- Text Search Input -->
+            <input type="text" class="form-control form-control-sm form-control-custom py-1" id="inlineSearchInput" placeholder="Find in resume..." style="max-width: 140px; font-size: 0.75rem;">
+            
+            <!-- Zoom & Print controls -->
+            <button class="btn btn-sm btn-light border py-1" id="zoomOutBtn" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+            <button class="btn btn-sm btn-light border py-1" id="zoomInBtn" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+            <button class="btn btn-sm btn-light border py-1" id="printBtn" title="Print"><i class="fa-solid fa-print"></i></button>
+            <button class="btn btn-sm btn-light border py-1" id="fullscreenBtn" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+          </div>
+        </div>
+
+        <!-- Highlight switches drawer -->
+        <div class="card-header bg-transparent border-bottom d-flex gap-3 py-2 px-3" style="font-size: 0.8rem;">
+          <div class="form-check form-switch m-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="highlightSkillsSwitch">
+            <label class="form-check-label text-muted fw-semibold" for="highlightSkillsSwitch">Highlight Matches</label>
+          </div>
+          <div class="form-check form-switch m-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="highlightRepeatedSwitch">
+            <label class="form-check-label text-muted fw-semibold" for="highlightRepeatedSwitch">Highlight Stuffing</label>
+          </div>
+        </div>
+        
+        <!-- Text viewport -->
+        <div class="preview-pane flex-grow-1" id="resumePreviewContainer">
+          <div class="parsed-resume-content" id="parsedResumeText">{{ resume.parsed_text }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Pane: Multi-metric Analytics & Career Advice -->
+    <div class="col-lg-6">
+      <div class="feedback-scroll">
+        
+        <!-- AI Intelligence Summary Badge Card -->
+        <div class="card glass-card p-4 shadow-sm border-0 mb-4">
+          <div class="row align-items-center">
+            <div class="col-sm-4 text-center border-end">
+              <span class="text-muted font-title fw-bold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">RESUME INTELLIGENCE</span>
+              <h2 class="fw-bold m-0 font-title" style="font-size: 3.2rem; color: var(--primary-color);">{{ score.overall_intelligence_score }}</h2>
+              <span class="badge bg-success rounded-pill px-3 py-1 mt-2" style="font-size: 0.75rem; background-color: var(--secondary-color) !important;">{{ score.match_rating }} Fit</span>
+            </div>
+            <div class="col-sm-8 ps-4">
+              <h5 class="font-title fw-bold mb-2">AI Summary & Fit Recommendation</h5>
+              <p class="text-muted mb-0" style="font-size: 0.88rem; line-height: 1.4;">
+                {{ score.insights_summary }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Navigation Tabs -->
+        <ul class="nav nav-tabs nav-tabs-custom mb-3" id="analysisTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="quality-tab" data-bs-toggle="tab" data-bs-target="#quality" type="button" role="tab">12-Point Match</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback" type="button" role="tab">Strengths/Suggestions</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="gap-tab" data-bs-toggle="tab" data-bs-target="#gap" type="button" role="tab">Gap & Timeline</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison" type="button" role="tab">JD Comparison</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="journey-tab" data-bs-toggle="tab" data-bs-target="#journey" type="button" role="tab">Hiring Stage</button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="analysisTabContent">
+          
+          <!-- Tab 1: 12-Point Match breakdown -->
+          <div class="tab-pane fade show active" id="quality" role="tabpanel">
+            <div class="card glass-card p-4 shadow-sm border-0">
+              <h5 class="font-title fw-bold mb-3">AI Evaluation Breakdowns</h5>
+              
+              <div class="row">
+                
+                <!-- Left column -->
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">ATS Compatibility</span>
+                      <span class="text-muted">{{ score.ats_compatibility }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.ats_compatibility }}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Technical Skills</span>
+                      <span class="text-muted">{{ score.tech_skills }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.tech_skills }}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Soft Skills</span>
+                      <span class="text-muted">{{ score.soft_skills }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.soft_skills }}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Communication Metrics</span>
+                      <span class="text-muted">{{ score.communication }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.communication }}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Experience & Progression</span>
+                      <span class="text-muted">{{ score.experience_score }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.experience_score }}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3 mb-md-0">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Education & Academics</span>
+                      <span class="text-muted">{{ score.education_score }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.education_score }}%;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right column -->
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Projects Impact Metrics</span>
+                      <span class="text-muted">{{ score.projects_score }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.projects_score }}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Professional Certs</span>
+                      <span class="text-muted">{{ score.certifications_score }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.certifications_score }}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Document Formatting</span>
+                      <span class="text-muted">{{ score.formatting_score }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.formatting_score }}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Grammar Check</span>
+                      <span class="text-muted">{{ score.grammar_score }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.grammar_score }}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Professionalism Index</span>
+                      <span class="text-muted">{{ score.professionalism_score }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.professionalism_score }}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-0">
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.82rem;">
+                      <span class="fw-semibold">Flesch Readability Index</span>
+                      <span class="text-muted">{{ score.readability_score }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background-color: rgba(var(--primary-rgb), 0.1);">
+                      <div class="progress-bar-custom" style="width: {{ score.readability_score }}%;"></div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Tab 2: AI Feedback Lists -->
+          <div class="tab-pane fade" id="feedback" role="tabpanel">
+            <div class="card glass-card p-4 shadow-sm border-0">
+              
+              <h6 class="font-title fw-bold text-success mb-2"><i class="fa-solid fa-circle-check me-2"></i>Matched Strengths</h6>
+              <ul class="mb-4 ps-3 text-muted" style="font-size: 0.88rem; line-height: 1.5;">
+                {% for st in strengths %}
+                  <li class="mb-2">{{ st }}</li>
+                {% endfor %}
+              </ul>
+
+              <h6 class="font-title fw-bold text-danger mb-2"><i class="fa-solid fa-circle-xmark me-2"></i>Areas of Weakness</h6>
+              <ul class="mb-4 ps-3 text-muted" style="font-size: 0.88rem; line-height: 1.5;">
+                {% for wk in weaknesses %}
+                  <li class="mb-2">{{ wk }}</li>
+                {% endfor %}
+              </ul>
+
+              <h6 class="font-title fw-bold text-primary mb-2"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>Optimization Suggestions</h6>
+              <ul class="mb-0 ps-3 text-muted" style="font-size: 0.88rem; line-height: 1.5;">
+                {% for sg in suggestions %}
+                  <li class="mb-2">{{ sg }}</li>
+                {% endfor %}
+              </ul>
+
+            </div>
+          </div>
+
+          <!-- Tab 3: Skill Gaps, timelines and Calendar link -->
+          <div class="tab-pane fade" id="gap" role="tabpanel">
+            <div class="card glass-card p-4 shadow-sm border-0">
+              
+              <div class="mb-3">
+                <h6 class="font-title fw-bold text-success mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">MATCHED TECH SKILLS</h6>
+                <div class="d-flex flex-wrap gap-1 mt-2">
+                  {% if present_skills %}
+                    {% for skill in present_skills %}
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1.5" style="font-size: 0.78rem;">{{ skill }}</span>
+                    {% endfor %}
+                  {% else %}
+                    <span class="text-muted" style="font-size: 0.85rem;">None identified.</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <h6 class="font-title fw-bold text-danger mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">HIGH PRIORITY MISSING SKILLS</h6>
+                <div class="d-flex flex-wrap gap-1 mt-2">
+                  {% if high_priority_skills %}
+                    {% for skill in high_priority_skills %}
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-1.5" style="font-size: 0.78rem;">{{ skill }}</span>
+                    {% endfor %}
+                  {% else %}
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1.5" style="font-size: 0.78rem;">None! Core tech stacks present</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              {% if optional_skills %}
+              <div class="mb-3">
+                <h6 class="font-title fw-bold text-muted mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">OPTIONAL / DESIRED MISSING SKILLS</h6>
+                <div class="d-flex flex-wrap gap-1 mt-2">
+                  {% for skill in optional_skills %}
+                  <span class="badge bg-light text-dark border rounded-pill px-3 py-1.5" style="font-size: 0.78rem;">{{ skill }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              <div class="border-top pt-3 mt-3">
+                <h6 class="font-title fw-bold text-primary mb-2" style="font-size: 0.85rem;">Career roadmap & learning timeline:</h6>
+                <ul class="list-group list-group-flush text-muted mb-3" style="font-size: 0.85rem;">
+                  {% for stage, task in learning_timeline.items() %}
+                  <li class="list-group-item px-0 py-2 border-bottom-0">
+                    <strong>{{ stage }}:</strong> {{ task }}
+                  </li>
+                  {% endfor %}
+                </ul>
+                <div class="d-flex gap-2">
+                  {% if recommended_certifications %}
+                  <div class="flex-grow-1">
+                    <span class="d-block font-title fw-bold text-muted" style="font-size: 0.72rem; letter-spacing: 0.5px;">RECOMMENDED CERTIFICATIONS</span>
+                    <span class="badge bg-light text-dark border mt-1" style="font-size: 0.75rem;">{{ recommended_certifications[0] }}</span>
+                  </div>
+                  {% endif %}
+                  <div class="d-flex align-items-end">
+                    <a href="{{ url_for('interviews_calendar') }}" class="btn btn-sm btn-custom py-2">
+                      <i class="fa-regular fa-calendar-days me-1"></i>Book Interview
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Tab 4: Side-by-side JD comparison -->
+          <div class="tab-pane fade" id="comparison" role="tabpanel">
+            <div class="card glass-card p-4 shadow-sm border-0">
+              <h5 class="font-title fw-bold mb-3">Side-by-side JD Matching</h5>
+              
+              <div class="row g-3">
+                <div class="col-md-6 border-end">
+                  <h6 class="font-title fw-bold text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.5px;">JOB REQUIREMENTS</h6>
+                  <p class="text-muted" style="font-size: 0.85rem; line-height: 1.4;">
+                    {{ job.description }}
+                  </p>
+                  {% if job.preferred_skills %}
+                  <h6 class="font-title fw-bold text-muted mt-3 mb-2" style="font-size: 0.8rem; letter-spacing: 0.5px;">PREFERRED SKILLS</h6>
+                  <p class="text-muted" style="font-size: 0.85rem; line-height: 1.4;">
+                    {{ job.preferred_skills }}
+                  </p>
+                  {% endif %}
+                </div>
+                
+                <div class="col-md-6 ps-md-3">
+                  <h6 class="font-title fw-bold text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 0.5px;">CANDIDATE ALIGNMENT</h6>
+                  <div class="list-group list-group-flush" style="font-size: 0.85rem;">
+                    <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between">
+                      <span class="text-muted">Education Match:</span>
+                      <strong class="text-success">Satisfies degree requirements</strong>
+                    </div>
+                    <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between">
+                      <span class="text-muted">Experience Match:</span>
+                      <strong class="text-success">{{ (score.experience_score / 10.0)|int }} yrs exp found</strong>
+                    </div>
+                    <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between">
+                      <span class="text-muted">Tech Stack Match:</span>
+                      <strong class="text-success">{{ present_skills|length }} core technologies found</strong>
+                    </div>
+                    <div class="list-group-item px-0 py-2 border-bottom-0 d-flex justify-content-between">
+                      <span class="text-muted">Soft Skills Match:</span>
+                      <strong class="text-success">Communication index: {{ score.communication }}%</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Tab 5: Candidate Journey Stepper -->
+          <div class="tab-pane fade" id="journey" role="tabpanel">
+            <div class="card glass-card p-4 shadow-sm border-0">
+              <h5 class="font-title fw-bold mb-4">Recruitment Journey Timeline</h5>
+              
+              <div class="timeline-stepper">
+                {% for step in timeline %}
+                <div class="timeline-step">
+                  <div class="timeline-bubble"></div>
+                  <div class="timeline-date">{{ step.timestamp }}</div>
+                  <div class="timeline-title">{{ step.stage }}</div>
+                  <div class="timeline-desc">{{ step.note }}</div>
+                </div>
+                {% endfor %}
+              </div>
+              
+              <div class="border-top pt-3 mt-3">
+                <form action="{{ url_for('update_candidate_status', app_id=app_record.id) }}" method="POST" class="d-flex gap-2">
+                  <select class="form-select form-control-custom flex-grow-1" name="status" style="font-size: 0.85rem;">
+                    <option value="Applied" {% if app_record.status == 'Applied' %}selected{% endif %}>Applied</option>
+                    <option value="Screening" {% if app_record.status == 'Screening' %}selected{% endif %}>Screening</option>
+                    <option value="Shortlisted" {% if app_record.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                    <option value="Interview Scheduled" {% if app_record.status == 'Interview Scheduled' %}selected{% endif %}>Interview Scheduled</option>
+                    <option value="Technical Round" {% if app_record.status == 'Technical Round' %}selected{% endif %}>Technical Round</option>
+                    <option value="HR Round" {% if app_record.status == 'HR Round' %}selected{% endif %}>HR Round</option>
+                    <option value="Selected" {% if app_record.status == 'Selected' %}selected{% endif %}>Selected</option>
+                    <option value="Rejected" {% if app_record.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                  </select>
+                  <button type="submit" class="btn btn-custom py-2" style="font-size: 0.85rem;">Advance Stage</button>
+                </form>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const resumeTextEl = document.getElementById('parsedResumeText');
+    const previewContainer = document.getElementById('resumePreviewContainer');
+    
+    // Zoom control
+    let currentFontSize = 0.95;
+    document.getElementById('zoomInBtn').addEventListener('click', () => {
+      currentFontSize = Math.min(1.5, currentFontSize + 0.1);
+      resumeTextEl.style.fontSize = currentFontSize + 'rem';
+    });
+    document.getElementById('zoomOutBtn').addEventListener('click', () => {
+      currentFontSize = Math.max(0.7, currentFontSize - 0.1);
+      resumeTextEl.style.fontSize = currentFontSize + 'rem';
+    });
+
+    // Print control
+    document.getElementById('printBtn').addEventListener('click', () => {
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write('<html><head><title>Resume Print</title>');
+      printWindow.document.write('<style>body { font-family: monospace; white-space: pre-wrap; padding: 30px; }</style>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write(resumeTextEl.innerHTML);
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    });
+
+    // Fullscreen control
+    document.getElementById('fullscreenBtn').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        previewContainer.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    });
+
+    // Search query highlighting
+    const searchInput = document.getElementById('inlineSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            applyHighlights();
+        });
+    }
+
+    // Dynamic highlights switches
+    const matchedSkills = {{ present_skills | safe }};
+    const repeatedKeywords = {{ repeated_keywords | safe }};
+    const originalText = resumeTextEl.innerHTML;
+
+    function applyHighlights() {
+      let html = originalText;
+      const highlightSkills = document.getElementById('highlightSkillsSwitch').checked;
+      const highlightRepeated = document.getElementById('highlightRepeatedSwitch').checked;
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+      const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Highlight matched skills
+      if (highlightSkills) {
+        matchedSkills.forEach(skill => {
+          const regex = new RegExp('\\b(' + escapeRegExp(skill) + ')\\b', 'gi');
+          html = html.replace(regex, '<mark class="highlight-present">$1</mark>');
+        });
+      }
+
+      // Highlight stuffed keywords
+      if (highlightRepeated) {
+        repeatedKeywords.forEach(item => {
+          const regex = new RegExp('\\b(' + escapeRegExp(item.keyword) + ')\\b', 'gi');
+          html = html.replace(regex, '<mark class="highlight-repeated">$1</mark>');
+        });
+      }
+
+      // Highlight search strings
+      if (query.length > 1) {
+          const regex = new RegExp('(' + escapeRegExp(query) + ')', 'gi');
+          html = html.replace(regex, '<mark class="highlight-search">$1</mark>');
+      }
+
+      resumeTextEl.innerHTML = html;
+    }
+
+    document.getElementById('highlightSkillsSwitch').addEventListener('change', applyHighlights);
+    document.getElementById('highlightRepeatedSwitch').addEventListener('change', applyHighlights);
+  });
+</script>
+{% endblock %}

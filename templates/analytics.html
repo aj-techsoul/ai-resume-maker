@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Talent Analytics - ScreenAI{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="font-title fw-bold m-0">Talent Pools Analytics</h2>
+      <p class="text-muted mb-0">Aggregate statistics of keyword overlaps, source universities, experience distribution, and candidate pipelines</p>
+    </div>
+    
+    <!-- Filter Job Role -->
+    <form action="{{ url_for('analytics_portal') }}" method="GET" class="d-flex gap-2">
+      <select class="form-select form-control-custom" name="job_id" onchange="this.form.submit();" style="min-width: 200px;">
+        <option value="">All Job Roles</option>
+        {% for job in jobs %}
+        <option value="{{ job.id }}" {% if selected_job_id == job.id %}selected{% endif %}>{{ job.title }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+
+  <!-- Interactive 8 Charts Grid -->
+  <div class="row g-4 mb-4">
+    
+    <!-- Daily Applications Timeline -->
+    <div class="col-lg-6">
+      <div class="card glass-card p-4 shadow-sm border-0 h-100">
+        <h5 class="font-title fw-bold mb-3">Applications Progression</h5>
+        <div style="height: 250px; position: relative;">
+          <canvas id="dailyAppsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hiring Funnel stages -->
+    <div class="col-lg-6">
+      <div class="card glass-card p-4 shadow-sm border-0 h-100">
+        <h5 class="font-title fw-bold mb-3">Hiring Stage Funnel</h5>
+        <div style="height: 250px; position: relative;">
+          <canvas id="funnelChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills Distribution Heatmap -->
+    <div class="col-lg-6">
+      <div class="card glass-card p-4 shadow-sm border-0 h-100">
+        <h5 class="font-title fw-bold mb-3">Skills Frequency Heatmap</h5>
+        <div style="height: 250px; position: relative;">
+          <canvas id="skillsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sourcing Universities -->
+    <div class="col-lg-6">
+      <div class="card glass-card p-4 shadow-sm border-0 h-100">
+        <h5 class="font-title fw-bold mb-3">Top University Sourcing</h5>
+        <div style="height: 250px; position: relative;">
+          <canvas id="universitiesChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Experience Slices -->
+    <div class="col-lg-6">
+      <div class="card glass-card p-4 shadow-sm border-0 h-100">
+        <h5 class="font-title fw-bold mb-3">Experience Distribution</h5>
+        <div style="height: 250px; position: relative;">
+          <canvas id="experienceChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Education Degree shares -->
+    <div class="col-lg-6">
+      <div class="card glass-card p-4 shadow-sm border-0 h-100">
+        <h5 class="font-title fw-bold mb-3">Education Distribution</h5>
+        <div style="height: 250px; position: relative;">
+          <canvas id="educationChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Distribution -->
+    <div class="col-lg-6">
+      <div class="card glass-card p-4 shadow-sm border-0 h-100">
+        <h5 class="font-title fw-bold mb-3">ATS Score Distribution</h5>
+        <div style="height: 250px; position: relative;">
+          <canvas id="scoreDistributionChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ranking trends -->
+    <div class="col-lg-6">
+      <div class="card glass-card p-4 shadow-sm border-0 h-100">
+        <h5 class="font-title fw-bold mb-3">Hiring Success Match Rate</h5>
+        <div style="height: 250px; position: relative;">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Pass data payload to charts.js -->
+<script id="analyticsData" type="application/json">
+  {{ chart_data | safe }}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+
+{% block title %}Candidate Career Center - ScreenAI Enterprise ATS{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  
+  <!-- Page Header & Subtitle -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div>
+      <h2 class="font-title fw-bold m-0">Candidate Career Center</h2>
+      <p class="text-muted mb-0">Track applications, monitor ATS resume performance, and manage recruiter engagements.</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <a href="{{ url_for('candidate_resume_builder') }}" class="btn btn-primary rounded-3 font-title px-3">
+        <i class="fa-solid fa-wand-magic-sparkles me-2"></i>AI Resume Builder
+      </a>
+    </div>
+  </div>
+
+  <!-- 8 Enterprise KPI Statistics Cards Grid -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3 col-xl-3">
+      <div class="glass-card p-3 d-flex align-items-center gap-3">
+        <div class="avatar-md bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+          <i class="fa-solid fa-list-check fs-5"></i>
+        </div>
+        <div>
+          <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Resume Completion</small>
+          <h4 class="fw-bold mb-0 text-dark">{{ kpis.resume_completion }}%</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3 col-xl-3">
+      <div class="glass-card p-3 d-flex align-items-center gap-3">
+        <div class="avatar-md bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+          <i class="fa-solid fa-bullseye fs-5"></i>
+        </div>
+        <div>
+          <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Highest ATS Score</small>
+          <h4 class="fw-bold mb-0 text-success">{{ kpis.ats_score }}%</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3 col-xl-3">
+      <div class="glass-card p-3 d-flex align-items-center gap-3">
+        <div class="avatar-md bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+          <i class="fa-solid fa-eye fs-5"></i>
+        </div>
+        <div>
+          <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Recruiter Views</small>
+          <h4 class="fw-bold mb-0 text-info">{{ kpis.recruiter_views }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3 col-xl-3">
+      <div class="glass-card p-3 d-flex align-items-center gap-3">
+        <div class="avatar-md bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+          <i class="fa-solid fa-paper-plane fs-5"></i>
+        </div>
+        <div>
+          <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Applications</small>
+          <h4 class="fw-bold mb-0 text-warning">{{ kpis.applications_submitted }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3 col-xl-3">
+      <div class="glass-card p-3 d-flex align-items-center gap-3">
+        <div class="avatar-md bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+          <i class="fa-regular fa-calendar-check fs-5"></i>
+        </div>
+        <div>
+          <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Interviews</small>
+          <h4 class="fw-bold mb-0 text-dark">{{ kpis.interview_invitations }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3 col-xl-3">
+      <div class="glass-card p-3 d-flex align-items-center gap-3">
+        <div class="avatar-md bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+          <i class="fa-solid fa-crown fs-5"></i>
+        </div>
+        <div>
+          <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Profile Strength</small>
+          <h6 class="fw-bold mb-0 text-primary">{{ kpis.profile_strength }}</h6>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3 col-xl-3">
+      <div class="glass-card p-3 d-flex align-items-center gap-3">
+        <div class="avatar-md bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+          <i class="fa-solid fa-download fs-5"></i>
+        </div>
+        <div>
+          <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Resume Downloads</small>
+          <h4 class="fw-bold mb-0 text-dark">{{ kpis.resume_downloads }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3 col-xl-3">
+      <div class="glass-card p-3 d-flex align-items-center gap-3">
+        <div class="avatar-md bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+          <i class="fa-solid fa-heart-pulse fs-5"></i>
+        </div>
+        <div>
+          <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Resume Health</small>
+          <h4 class="fw-bold mb-0 text-danger">{{ kpis.resume_health }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Charts & Analytics Section -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <div class="glass-card p-4 shadow-sm border-0 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="font-title fw-bold m-0"><i class="fa-solid fa-chart-line text-primary me-2"></i>Recruiter Views & Application Activity</h5>
+          <span class="badge bg-light text-muted font-mono">Last 6 Weeks</span>
+        </div>
+        <div style="height: 250px;">
+          <canvas id="candActivityChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="glass-card p-4 shadow-sm border-0 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="font-title fw-bold m-0"><i class="fa-solid fa-arrow-trend-up text-success me-2"></i>ATS Improvement History</h5>
+        </div>
+        <div style="height: 250px;">
+          <canvas id="candAtsHistoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace Row -->
+  <div class="row g-4">
+    
+    <!-- Left Column: Apply Form & Active Applications -->
+    <div class="col-lg-8">
+      
+      <!-- Upload / Apply Card -->
+      <div class="card glass-card p-4 shadow-sm border-0 mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="font-title fw-bold mb-0"><i class="fa-solid fa-file-arrow-up text-primary me-2"></i>Apply for Open Position</h5>
+          <small class="text-muted">Upload PDF or DOCX resume to get screened instantly</small>
+        </div>
+        
+        <form action="{{ url_for('upload_resume') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+          <div class="mb-3">
+            <label for="job_id" class="form-label font-title fw-semibold text-muted mb-1" style="font-size: 0.82rem;">SELECT TARGET JOB ROLE</label>
+            <select class="form-select form-control-custom" id="job_id" name="job_id" required>
+              <option value="" disabled selected>Select an open job role...</option>
+              {% for job in available_jobs %}
+              <option value="{{ job.id }}">{{ job.title }} ({{ job.department }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Drag and Drop Upload Zone -->
+          <div class="upload-dropzone mb-3" id="uploadDropzone">
+            <div class="py-3">
+              <i class="fa-solid fa-cloud-arrow-up text-primary fs-1 mb-3"></i>
+              <h5 class="font-title fw-bold">Drag & Drop Resume File Here</h5>
+              <p class="text-muted mb-0" style="font-size: 0.85rem;">Supports PDF and DOCX files (Max 5MB)</p>
+              <p class="text-primary fw-semibold mt-2 mb-0" style="font-size: 0.9rem;" id="selectedFileName"></p>
+            </div>
+            <input type="file" id="resumeFile" name="resume" class="d-none" accept=".pdf,.docx">
+          </div>
+          
+          <div class="alert alert-danger d-none" id="uploadError"></div>
+
+          <!-- Upload Progress Bar -->
+          <div class="upload-progress-wrapper d-none mb-3" id="progressContainer">
+            <div class="d-flex justify-content-between mb-1" style="font-size: 0.8rem;">
+              <span class="text-muted fw-semibold">UPLOADING & RUNNING ATS SCREENING...</span>
+              <span class="text-primary fw-bold" id="progressPercent">0%</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar-custom" id="progressBar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-custom w-100 py-2 font-title fw-semibold" id="submitUploadBtn" disabled>
+            <i class="fa-solid fa-paper-plane me-2"></i>Submit Application for Screening
+          </button>
+        </form>
+      </div>
+
+      <!-- Application Tracker -->
+      <div class="card glass-card p-4 shadow-sm border-0">
+        <h5 class="font-title fw-bold mb-3"><i class="fa-solid fa-clock-rotate-left text-info me-2"></i>Active Applications & Timeline Journey</h5>
+        
+        {% if applications_with_timeline %}
+          {% for app_item in applications_with_timeline %}
+            {% set app = app_item.app %}
+            {% set timeline = app_item.timeline %}
+            {% set score_item = app_item.score %}
+            <div class="border rounded p-3 mb-3 bg-light bg-opacity-25" style="background-color: var(--card-bg) !important; border-color: var(--border-color) !important;">
+              <div class="d-flex justify-content-between align-items-start mb-3 border-bottom pb-2" style="border-color: var(--border-color) !important;">
+                <div>
+                  <h6 class="font-title fw-bold m-0" style="color: var(--text-color);">{{ app.job.title }}</h6>
+                  <small class="text-muted">{{ app.job.department }} &bull; Applied: {{ app.applied_at.strftime('%Y-%m-%d') }}</small>
+                </div>
+                <div class="text-end">
+                  <span class="badge-status badge-{{ app.status.split()[0] }} mb-1">{{ app.status }}</span>
+                  {% if score_item %}
+                  <span class="d-block fw-bold text-success" style="font-size: 0.95rem;">AI Score: {{ score_item.overall_intelligence_score }}/100</span>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <!-- Timeline stepper -->
+              <h6 class="font-title fw-semibold text-muted mb-3" style="font-size: 0.78rem;">RECRUITMENT STAGE HISTORY:</h6>
+              <div class="timeline-stepper">
+                {% for step in timeline %}
+                <div class="timeline-step">
+                  <div class="timeline-bubble"></div>
+                  <div class="timeline-date">{{ step.timestamp }}</div>
+                  <div class="timeline-title">{{ step.stage }}</div>
+                  <div class="timeline-desc">{{ step.note }}</div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="py-4 text-center text-muted">
+            No active applications found. Select an open position above and submit your resume!
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- Right Column: Alerts & Tips -->
+    <div class="col-lg-4">
+      
+      <!-- Alerts & Updates Card -->
+      <div class="card glass-card p-4 shadow-sm border-0 mb-4">
+        <h5 class="font-title fw-bold mb-3"><i class="fa-regular fa-bell text-primary me-2"></i>Alerts & Updates</h5>
+        <div class="list-group list-group-flush" style="font-size: 0.85rem;">
+          {% if notifications %}
+            {% for notif in notifications[:5] %}
+            <div class="list-group-item px-0 py-3 {% if not notif.is_read %}bg-light bg-opacity-25 px-2 rounded mb-1{% endif %}" style="background-color: var(--card-bg) !important; border-bottom: 1px solid var(--border-color) !important;">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong class="text-primary">{{ notif.title }}</strong>
+                <small class="text-muted">{{ notif.created_at.strftime('%m-%d') }}</small>
+              </div>
+              <p class="text-muted mb-0" style="color: var(--text-muted) !important;">{{ notif.message }}</p>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="py-3 text-center text-muted">No recent alerts.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Quick AI Tip Card -->
+      <div class="card glass-card p-4 shadow-sm border-0 bg-primary bg-opacity-5 text-primary" style="background-color: rgba(var(--primary-rgb), 0.05) !important;">
+        <h6 class="font-title fw-bold mb-2"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>AI Resume Builder Tip:</h6>
+        <p class="mb-0 text-muted" style="font-size: 0.85rem; line-height: 1.5; color: var(--text-muted) !important;">
+          Use our interactive <strong>AI Resume Builder</strong> to format bullet points with strong power action verbs and measurable performance metrics. Resumes created with AI Builder score up to 35% higher in ATS filters!
+        </p>
+        <div class="mt-3">
+          <a href="{{ url_for('candidate_resume_builder') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+            Open AI Resume Builder
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Candidate Dashboard Interactive Charts
+document.addEventListener('DOMContentLoaded', function() {
+  const candData = {{ cand_chart_data|safe }};
+  if (!candData) return;
+
+  const primary = getComputedStyle(document.body).getPropertyValue('--primary-color').trim() || '#1E40AF';
+  const secondary = getComputedStyle(document.body).getPropertyValue('--secondary-color').trim() || '#3B82F6';
+
+  // 1. Recruiter Views & Activity Chart
+  const actCtx = document.getElementById('candActivityChart');
+  if (actCtx) {
+    new Chart(actCtx, {
+      type: 'line',
+      data: {
+        labels: candData.timeline.labels,
+        datasets: [
+          {
+            label: 'Recruiter Views',
+            data: candData.timeline.views,
+            borderColor: secondary,
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true,
+            tension: 0.35
+          },
+          {
+            label: 'Applications',
+            data: candData.timeline.applications,
+            borderColor: primary,
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.35
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+
+  // 2. ATS Score History Chart
+  const atsCtx = document.getElementById('candAtsHistoryChart');
+  if (atsCtx) {
+    new Chart(atsCtx, {
+      type: 'bar',
+      data: {
+        labels: candData.ats_history.labels,
+        datasets: [{
+          label: 'ATS Score',
+          data: candData.ats_history.scores,
+          backgroundColor: [
+            'rgba(239, 68, 68, 0.7)',
+            'rgba(245, 158, 11, 0.7)',
+            'rgba(59, 130, 246, 0.7)',
+            'rgba(16, 185, 129, 0.85)'
+          ],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true, max: 100 } }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}
