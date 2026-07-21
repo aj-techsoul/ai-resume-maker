@@ -1,6 +1,6 @@
 # ScreenAI — Resume Screening & AI Builder Platform
 
-ScreenAI is an end-to-end recruitment platform built with Python and Flask. It combines an automated ATS screening engine for recruiters with an interactive AI resume builder for job applicants.
+ScreenAI is an end-to-end recruitment platform built with Python and Flask. It combines an automated ATS screening engine for recruiters with an interactive AI resume builder for job applicants...
 
 ---
 
